@@ -373,7 +373,7 @@ body.view-opt2 .opt1-only{display:none !important}
 .ov-sub{font-size:11px;color:var(--bk-muted);line-height:1.4}
 </style>
 </head>
-<body class="view-opt2">
+<body class="view-opt1">
 
 <!-- ─── MOBILE ONLY BLOCK ─── -->
 <div class="mobile-block">
@@ -387,7 +387,9 @@ body.view-opt2 .opt1-only{display:none !important}
   <h1>✈ חופשה תאילנד — פברואר 2027</h1>
   <div class="sub">הצעה 6509</div>
   <div class="agent-card">
-    <div class="agent-avatar" id="agentAvatar">א</div>
+    <div class="agent-avatar" id="agentAvatar">
+      <img src="https://pub-0cf6e905891a477fbe1dc1b8360ef92c.r2.dev/il-businesses/%D7%A9%D7%98%D7%99%D7%A4%D7%AA-%D7%91%D7%99%D7%9C%D7%90%D7%9C-%D7%97%D7%99%D7%A4%D7%94/1-61448797.webp" alt="אורי צייג" onerror="this.style.display='none';this.parentElement.textContent='א'">
+    </div>
     <div class="agent-info">
       <div class="agent-name">אורי צייג</div>
       <div class="agent-title">סוכן נסיעות</div>
@@ -399,15 +401,15 @@ body.view-opt2 .opt1-only{display:none !important}
 <!-- ─── OPTION SWITCHER ─── -->
 <div class="opt-bar">
   <span class="opt-label">בחרו הצעה:</span>
-  <button class="opt-btn" id="optBtn1" onclick="setOption(1)">הצעה 1</button>
-  <button class="opt-btn active" id="optBtn2" onclick="setOption(2)">הצעה 2</button>
+  <button class="opt-btn active" id="optBtn1" onclick="setOption(1)">הצעה 1</button>
+  <button class="opt-btn" id="optBtn2" onclick="setOption(2)">הצעה 2</button>
 </div>
 
 <!-- ─── STICKY NAV = JOURNEY — הצעה 1 ─── -->
-<nav class="sticky-nav opt1-only" id="stickyNav" style="display: none;">
+<nav class="sticky-nav opt1-only" id="stickyNav" style="">
   <a class="sn-stop active" href="#hotel1" id="snav1">
     <span>📍 קראבי</span>
-    <span class="sn-stop-score">7/10</span>
+    <span class="sn-stop-score">7.2/10</span>
   </a>
   <div class="sn-arrow by-car">
     <span class="sn-arrow-icon">🚗</span>
@@ -423,15 +425,15 @@ body.view-opt2 .opt1-only{display:none !important}
   </div>
   <a class="sn-stop" href="#hotel3" id="snav3">
     <span>📍 פוקט</span>
-    <span class="sn-stop-score">8.5/10</span>
+    <span class="sn-stop-score">9/10</span>
   </a>
 </nav>
 
 <!-- ─── STICKY NAV = JOURNEY — הצעה 2 ─── -->
-<nav class="sticky-nav opt2-only" id="stickyNav2" style="">
+<nav class="sticky-nav opt2-only" id="stickyNav2" style="display: none;">
   <a class="sn-stop active" href="#hotel1" id="snav1b">
     <span>📍 קראבי</span>
-    <span class="sn-stop-score">7/10</span>
+    <span class="sn-stop-score">7.2/10</span>
   </a>
   <div class="sn-arrow by-sea">
     <span class="sn-arrow-icon">🚢</span>
@@ -447,7 +449,7 @@ body.view-opt2 .opt1-only{display:none !important}
   </div>
   <a class="sn-stop" href="#hotel3" id="snav3b">
     <span>📍 פוקט</span>
-    <span class="sn-stop-score">8.5/10</span>
+    <span class="sn-stop-score">9/10</span>
   </a>
 </nav>
 
@@ -456,11 +458,11 @@ body.view-opt2 .opt1-only{display:none !important}
   <div class="content-col">
 
     <!-- Trip bar -->
-    <div class="footnote opt1-only" style="margin-bottom: 0.75rem; display: none;">
+    <div class="footnote opt1-only" style="margin-bottom: 0.75rem;">
       הזוג שלכם: 2 מבוגרים + ילדה בת 12 + תינוקת בת 2 · ארוחת בוקר כלולה בכל 3 המלונות · מחירים בבאט (฿) · לא כולל טיסות<br>
       <span style="color:#999;font-size:11px">הציון לוקח בחשבון: מיקום · איכות · התאמה לילדים · תמורה למחיר · ביקורות</span>
     </div>
-    <div class="footnote opt2-only" style="margin-bottom: 0.75rem;">
+    <div class="footnote opt2-only" style="margin-bottom: 0.75rem; display: none;">
       הזוג שלכם: 2 מבוגרים + ילדה בת 12 + תינוקת בת 2 · ארוחת בוקר כלולה בקראבי ובפוקט · <span style="color:#d97706;font-weight:600">⚠ יש לאשר ארוחת בוקר בפי פי</span> · מחירים בבאט (฿) · לא כולל טיסות<br>
       <span style="color:#999;font-size:11px">הציון לוקח בחשבון: מיקום · איכות · התאמה לילדים · תמורה למחיר · ביקורות</span>
     </div>
@@ -469,8 +471,8 @@ body.view-opt2 .opt1-only{display:none !important}
       <div class="ts"><div class="ts-val">פבר׳ 2027</div><div class="ts-lbl">עונת שיא</div></div>
       <div class="ts"><div class="ts-val">4 מבוגרים</div><div class="ts-lbl">2 זוגות</div></div>
       <div class="ts"><div class="ts-val">3 ילדים + תינוק</div><div class="ts-lbl">ילדים</div></div>
-      <div class="ts opt1-only" style="display: none;"><div class="ts-val">฿338,050</div><div class="ts-lbl">סה"כ קרקע</div></div>
-      <div class="ts opt2-only" style=""><div class="ts-val" style="color:#166534">฿330,900</div><div class="ts-lbl">סה"כ קרקע</div></div>
+      <div class="ts opt1-only" style=""><div class="ts-val">฿338,050</div><div class="ts-lbl">סה"כ קרקע</div></div>
+      <div class="ts opt2-only" style="display: none;"><div class="ts-val" style="color:#166534">฿330,900</div><div class="ts-lbl">סה"כ קרקע</div></div>
       <div class="ts"><div class="ts-val">฿3,000</div><div class="ts-lbl">הנחה</div></div>
     </div>
 
@@ -481,7 +483,7 @@ body.view-opt2 .opt1-only{display:none !important}
         <div class="cover-grad"></div>
         <div class="cover-dest"><span class="dest-badge b-krabi">📍 קראבי</span></div>
         <div class="cover-scores">
-          <div class="csb"><div class="csb-num a">7</div><div class="csb-lbl">ציון כולל</div></div>
+          <div class="csb"><div class="csb-num a">7.2</div><div class="csb-lbl">ציון כולל</div></div>
         </div>
         <div class="cover-bottom">
           <div class="cover-stars">★★★★★</div>
@@ -610,7 +612,7 @@ body.view-opt2 .opt1-only{display:none !important}
           <tbody>
             <tr class="cmp-ours">
               <td class="cmp-name">Dusit Thani Krabi <span class="cmp-tag ct-ours">ההצעה שלנו</span></td>
-              <td><span class="cmp-score cs-a">7</span></td>
+              <td><span class="cmp-score cs-a">7.2</span></td>
               <td><span class="cmp-score cs-a">7</span></td>
               <td><span class="cmp-score cs-a">6</span></td>
               <td>฿14,500</td>
@@ -656,7 +658,7 @@ body.view-opt2 .opt1-only{display:none !important}
     </div><!-- /hotel1 -->
 
     <!-- העברה 1 — הצעה 1 -->
-    <div class="transfer-wrap opt1-only" style="display: none;">
+    <div class="transfer-wrap opt1-only" style="">
       <div class="transfer-divider">🚗 מעבר בין מלונות — 07.02.2027</div>
       <div class="transfer-strip">
         <div class="tx-arrow">🚗</div>
@@ -672,7 +674,7 @@ body.view-opt2 .opt1-only{display:none !important}
       </div>
     </div>
     <!-- העברה 1 — הצעה 2 -->
-    <div class="transfer-wrap opt2-only" style="">
+    <div class="transfer-wrap opt2-only" style="display: none;">
       <div class="transfer-divider">🚢 מעבורת — 07.02.2027</div>
       <div class="transfer-strip">
         <div class="tx-arrow">🚢</div>
@@ -689,7 +691,7 @@ body.view-opt2 .opt1-only{display:none !important}
     </div>
 
     <!-- ════ מלון 2 ════ -->
-    <div class="hotel-card warn opt1-only" id="hotel2" style="display: none;">
+    <div class="hotel-card warn opt1-only" id="hotel2" style="">
       <div class="hotel-cover hc-khaolak">
         <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=70&auto=format&fit=crop" alt="קאו לאק" loading="lazy" onerror="this.style.opacity=0">
         <div class="cover-grad"></div>
@@ -869,8 +871,10 @@ body.view-opt2 .opt1-only{display:none !important}
     </div><!-- /hotel2 -->
 
     <!-- ════ הערת סוכן — הצעה 2 ════ -->
-    <div class="agent-note opt2-only" style="">
-      <div class="agent-note-avatar" style="background:#fef3c7;display:flex;align-items:center;justify-content:center;font-weight:800;color:#92400e">א</div>
+    <div class="agent-note opt2-only" style="display: none;">
+      <div class="agent-note-avatar">
+        <img src="https://pub-0cf6e905891a477fbe1dc1b8360ef92c.r2.dev/il-businesses/%D7%A9%D7%98%D7%99%D7%A4%D7%AA-%D7%91%D7%99%D7%9C%D7%90%D7%9C-%D7%97%D7%99%D7%A4%D7%94/1-61448797.webp" alt="אורי צייג" onerror="this.style.display='none'">
+      </div>
       <div class="agent-note-body">
         <div class="agent-note-from">💬 הערה מאורי הסוכן</div>
         <div class="agent-note-text">כפיר לא נתן לי מספיק זמן כדי למצוא מלון יותר קרוב למרכז — אבל המלון שהצעתי כאן הוא חוויה של אי בודד לשלושה ימים, במיקום הכי מושלם באזור 🌴</div>
@@ -878,7 +882,7 @@ body.view-opt2 .opt1-only{display:none !important}
     </div>
 
     <!-- ════ מלון 2 — הצעה 2: פי פי ════ -->
-    <div class="hotel-card opt2-only" id="hotel2b" style="">
+    <div class="hotel-card opt2-only" id="hotel2b" style="display: none;">
       <div class="hotel-cover hc-phiphi">
         <img src="https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=800&q=70&auto=format&fit=crop" alt="קו פי פי" loading="lazy" onerror="this.style.opacity=0">
         <div class="cover-grad"></div>
@@ -1090,7 +1094,7 @@ body.view-opt2 .opt1-only{display:none !important}
     </div><!-- /hotel2b -->
 
     <!-- העברה 2 — הצעה 1 -->
-    <div class="transfer-wrap opt1-only" style="display: none;">
+    <div class="transfer-wrap opt1-only" style="">
       <div class="transfer-divider">🚗 מעבר בין מלונות — 10.02.2027</div>
       <div class="transfer-strip">
         <div class="tx-arrow">🚗</div>
@@ -1106,7 +1110,7 @@ body.view-opt2 .opt1-only{display:none !important}
       </div>
     </div>
     <!-- העברה 2 — הצעה 2 -->
-    <div class="transfer-wrap opt2-only" style="">
+    <div class="transfer-wrap opt2-only" style="display: none;">
       <div class="transfer-divider">🚢 מעבורת — 10.02.2027</div>
       <div class="transfer-strip">
         <div class="tx-arrow">🚢</div>
@@ -1129,7 +1133,7 @@ body.view-opt2 .opt1-only{display:none !important}
         <div class="cover-grad"></div>
         <div class="cover-dest"><span class="dest-badge b-phuket">📍 פוקט</span></div>
         <div class="cover-scores">
-          <div class="csb"><div class="csb-num g">8.5</div><div class="csb-lbl">ציון כולל</div></div>
+          <div class="csb"><div class="csb-num g">9</div><div class="csb-lbl">ציון כולל</div></div>
         </div>
         <div class="cover-bottom">
           <div class="cover-stars">★★★★★</div>
@@ -1260,7 +1264,7 @@ body.view-opt2 .opt1-only{display:none !important}
           <tbody>
             <tr class="cmp-ours">
               <td class="cmp-name">Katathani Phuket <span class="cmp-tag ct-ours">ההצעה שלנו</span></td>
-              <td><span class="cmp-score cs-g">8.5</span></td>
+              <td><span class="cmp-score cs-g">9</span></td>
               <td><span class="cmp-score cs-g">9</span></td>
               <td><span class="cmp-score cs-g">9</span></td>
               <td>฿12,500</td>
@@ -1371,14 +1375,14 @@ function setOption(n) {
 
 // ── MAP SETUP ──
 var stops1 = [
-  { ll:[8.032,98.833], num:'1', color:'#1d4ed8', name:'Dusit Thani Krabi', sub:'קראבי · Klong Muang · ציון 7' },
+  { ll:[8.032,98.833], num:'1', color:'#1d4ed8', name:'Dusit Thani Krabi', sub:'קראבי · Klong Muang · ציון 7.2' },
   { ll:[8.770,98.258], num:'2', color:'#b45309', name:'Kalima Khao Lak',   sub:'קאו לאק · Lam Kaen · ציון 5'  },
-  { ll:[7.818,98.297], num:'3', color:'#166534', name:'Katathani Phuket',  sub:'פוקט · Kata Noi · ציון 8.5'  }
+  { ll:[7.818,98.297], num:'3', color:'#166534', name:'Katathani Phuket',  sub:'פוקט · Kata Noi · ציון 9'  }
 ];
 var stops2 = [
-  { ll:[8.032,98.833], num:'1', color:'#1d4ed8', name:'Dusit Thani Krabi',    sub:'קראבי · Klong Muang · ציון 7'   },
+  { ll:[8.032,98.833], num:'1', color:'#1d4ed8', name:'Dusit Thani Krabi',    sub:'קראבי · Klong Muang · ציון 7.2'   },
   { ll:[7.784,98.768], num:'2', color:'#0891b2', name:'Phi Phi Natural Resort',sub:'Laem Tong · ציון 8.4'           },
-  { ll:[7.818,98.297], num:'3', color:'#166534', name:'Katathani Phuket',      sub:'פוקט · Kata Noi · ציון 8.5'    }
+  { ll:[7.818,98.297], num:'3', color:'#166534', name:'Katathani Phuket',      sub:'פוקט · Kata Noi · ציון 9'    }
 ];
 var stops = stops1;
 
