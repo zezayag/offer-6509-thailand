@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>תאילנד פברואר 2027 — הצעה 6509</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+/* MOBILE-ONLY block disabled — page now responsive on all viewports */
+.mobile-block{display:none!important}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px;-webkit-text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#f2f6fa;color:#262626;direction:rtl}
+.page-wrap{overflow-x:hidden} /* contain horizontal overflow without breaking position:fixed */
+
+/* ─── BOOKING COLORS ─── */
+:root{
+  --bk-blue:#003580;
+  --bk-mid:#0071c2;
+  --bk-yellow:#febb02;
+  --bk-bg:#f2f6fa;
+  --bk-card:#fff;
+  --bk-border:#e7e7e7;
+  --bk-text:#262626;
+  --bk-muted:#6b6b6b;
+  --bk-green:#008009;
+  --bk-score:#003580;
+}
+
+/* ─── STICKY NAV (JOURNEY) ─── */
+.sticky-nav{
+  position:sticky;top:0;z-index:9999;
+  background:var(--bk-blue);
+  padding:.5rem 0;
+  width:100%;
+  display:flex;align-items:center;justify-content:space-around;
+  gap:0;overflow-x:hidden;
+  scrollbar-width:none;white-space:nowrap;
+  box-shadow:0 2px 8px rgba(0,0,0,.25);
+}
+.sticky-nav::-webkit-scrollbar{display:none}
+.sn-stop{
+  display:inline-flex;flex-direction:column;align-items:center;
+  text-decoration:none;color:rgba(255,255,255,.75);
+  padding:.3rem .7rem;border-radius:6px;
+  font-size:12px;font-weight:600;
+  flex:1;gap:1px;
+}
+.sn-stop:active,.sn-stop.active{background:none;color:rgba(255,255,255,.75);}
+.sn-stop-score{font-size:10px;font-weight:800;background:rgba(255,255,255,.15);border-radius:4px;padding:0 4px;line-height:1.5}
+.sn-stop.active .sn-stop-score{background:rgba(255,255,255,.15)}
+.sn-arrow{
+  flex-shrink:0;display:flex;flex-direction:column;align-items:center;
+  padding:.2rem .35rem;border-radius:6px;font-size:11px;gap:2px;
+}
+.sn-arrow.by-car{background:rgba(254,187,2,.12);border:1px solid rgba(254,187,2,.25)}
+.sn-arrow.by-sea{background:rgba(8,145,178,.22);border:1px solid rgba(8,145,178,.4)}
+.sn-arrow-icon{font-size:15px;line-height:1}
+.sn-arrow.by-car .sn-arrow-icon{filter:drop-shadow(0 0 3px rgba(254,187,2,.6))}
+.sn-arrow.by-sea .sn-arrow-icon{filter:drop-shadow(0 0 3px rgba(8,145,178,.8))}
+.sn-arrow-km{font-size:9px;white-space:nowrap;font-weight:600}
+.sn-arrow.by-car .sn-arrow-km{color:rgba(254,187,2,.85)}
+.sn-arrow.by-sea .sn-arrow-km{color:rgba(103,213,255,.9)}
+
+/* ─── PAGE LAYOUT ─── */
+.page-header{background:var(--bk-blue);padding:1rem .85rem .85rem}
+.page-header h1{font-size:17px;font-weight:700;color:#fff;line-height:1.3}
+.page-header .sub{font-size:12px;color:rgba(255,255,255,.65);margin-top:.2rem}
+
+/* ─── AGENT CARD ─── */
+.agent-card{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:10px;
+  padding:.55rem .75rem;
+  margin-top:.65rem;
+  display:flex;align-items:center;gap:.65rem;
+  max-width:300px;
+}
+.agent-avatar{
+  width:42px;height:42px;border-radius:50%;
+  object-fit:cover;flex-shrink:0;
+  border:2px solid rgba(255,255,255,.35);
+  background:#1a4a8a;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;font-weight:800;color:#febb02;
+  overflow:hidden;
+}
+.agent-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.agent-info{flex:1;min-width:0}
+.agent-name{font-size:13px;font-weight:700;color:#fff;line-height:1.3}
+.agent-title{font-size:11px;color:rgba(255,255,255,.6);margin-top:1px}
+.agent-phone{font-size:12px;color:var(--bk-yellow);font-weight:600;margin-top:2px;direction:ltr;text-align:right}
+
+/* ─── AGENT NOTE ─── */
+.agent-note{
+  background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%);
+  border:1.5px solid #f59e0b;
+  border-right:4px solid #d97706;
+  border-radius:8px;
+  padding:.75rem .9rem;
+  margin-bottom:.75rem;
+  display:flex;gap:.65rem;align-items:flex-start;
+}
+.agent-note-avatar{
+  width:36px;height:36px;border-radius:50%;
+  object-fit:cover;flex-shrink:0;
+  border:2px solid #d97706;
+  overflow:hidden;
+}
+.agent-note-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.agent-note-body{flex:1;min-width:0}
+.agent-note-from{font-size:10px;font-weight:800;color:#92400e;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.agent-note-text{font-size:12.5px;color:#78350f;line-height:1.55;font-style:italic}
+
+.outer{padding:.75rem .75rem 4rem;max-width:1100px;margin:0 auto}
+
+/* Desktop two-col layout */
+@media(min-width:800px){
+  .outer{display:grid;grid-template-columns:1fr 380px;gap:16px;align-items:start;padding:.85rem 1rem 4rem}
+  .content-col{min-width:0}
+  .map-mobile-toggle{display:none}
+  .trip-bar{grid-template-columns:repeat(6,1fr)}
+  /* Desktop map: sticky inside grid column */
+  .map-col-desktop{
+    position:sticky;top:56px;
+    height:calc(100vh - 70px);
+    display:flex;flex-direction:column;gap:0;
+    border-radius:10px;overflow:hidden;
+    border:1px solid var(--bk-border);
+    box-shadow:0 1px 6px rgba(0,0,0,.08);
+  }
+  .map-col-desktop #routeMap{flex:1;min-height:0}
+  .map-col-mobile{display:none}
+}
+
+/* Mobile map: position:fixed directly on body, outside any overflow container */
+.map-col-mobile{
+  position:fixed;bottom:0;right:0;left:0;
+  z-index:5000;
+  background:#fff;
+  border-top:3px solid var(--bk-blue);
+  border-radius:16px 16px 0 0;
+  transform:translateY(100%);
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+  height:60vh;
+  display:flex;flex-direction:column;
+  box-shadow:0 -6px 28px rgba(0,0,0,.22);
+}
+.map-col-mobile.open{transform:translateY(0)}
+.map-col-mobile #routeMap{flex:1;min-height:0}
+
+.map-mobile-toggle{
+  position:fixed;
+  bottom:22px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:5001;
+  background:var(--bk-blue);color:#fff;border:none;
+  border-radius:50px;padding:.6rem 1.5rem;
+  font-size:14px;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 18px rgba(0,53,128,.45);
+  white-space:nowrap;
+  transition:background .15s, box-shadow .15s;
+}
+.map-mobile-toggle.is-open{background:#b91c1c}
+@media(min-width:800px){.map-mobile-toggle{display:none}}
+.map-header{
+  background:var(--bk-blue);padding:.5rem .85rem;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.map-header-text{font-size:12px;font-weight:700;color:#fff}
+.map-close{background:none;border:none;color:rgba(255,255,255,.75);font-size:18px;cursor:pointer;padding:0 4px;display:none}
+@media(max-width:799px){.map-close{display:block}}
+
+/* ─── TRIP BAR ─── */
+.trip-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:.75rem}
+.ts{background:#fff;border:1px solid var(--bk-border);border-radius:6px;padding:.5rem .5rem;text-align:center}
+.ts-val{font-size:13px;font-weight:700;color:var(--bk-blue)}
+.ts-lbl{font-size:10px;color:var(--bk-muted);margin-top:1px}
+
+/* ─── HOTEL CARD ─── */
+.hotel-card{background:#fff;border:1px solid var(--bk-border);border-radius:8px;overflow:hidden;margin-bottom:.75rem;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.hotel-card.warn{border-color:#d97706;border-left:3px solid #d97706}
+
+/* Cover */
+.hotel-cover{position:relative;height:160px;overflow:hidden;isolation:isolate}
+.hotel-cover img{width:100%;height:100%;object-fit:cover;filter:brightness(.6);display:block}
+/* Gradient fallbacks per hotel — aligned with map marker colors */
+/* Krabi: blue #1d4ed8 | Khao Lak: amber #b45309 | Phuket: green #166534 */
+.hc-krabi  {background:linear-gradient(135deg,#0f2d6e 0%,#1d4ed8 55%,#1e40af 100%)}
+.hc-khaolak{background:linear-gradient(135deg,#6b2900 0%,#b45309 55%,#92400e 100%)}
+.hc-phuket {background:linear-gradient(135deg,#14532d 0%,#166534 55%,#15803d 100%)}
+.cover-grad{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.2) 0%,transparent 40%,rgba(0,0,0,.75) 100%)}
+.cover-dest{position:absolute;top:.6rem;right:.75rem}
+.dest-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;color:#fff}
+.b-krabi  {background:rgba(29,78,216,.88)}
+.b-khaolak{background:rgba(180,83,9,.88)}
+.b-phuket {background:rgba(22,101,52,.88)}
+.cover-scores{position:absolute;top:.6rem;left:.75rem;display:flex;gap:5px}
+.csb{text-align:center;background:rgba(0,0,0,.55);border-radius:6px;padding:.3rem .55rem;border:0.5px solid rgba(255,255,255,.2)}
+.csb-num{font-size:17px;font-weight:800;color:#fff;line-height:1}
+.csb-num.g{color:#4ade80}.csb-num.a{color:#febb02}.csb-num.r{color:#f87171}
+.csb-lbl{font-size:9px;color:rgba(255,255,255,.6);margin-top:1px}
+.cover-bottom{position:absolute;bottom:0;right:0;left:0;padding:.65rem .8rem}
+.cover-stars{color:#febb02;font-size:12px;margin-bottom:2px}
+.c-num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:800;margin-left:5px;vertical-align:middle}
+/* circle numbers match map marker colors exactly */
+.n1{background:#dbeafe;color:#1d4ed8}
+.n2{background:#fef3c7;color:#b45309}
+.n3{background:#dcfce7;color:#166534}
+.cover-title{font-size:15px;font-weight:700;color:#fff;text-shadow:0 1px 5px rgba(0,0,0,.6);line-height:1.3}
+.cover-sub-text{font-size:11px;color:rgba(255,255,255,.8)}
+
+/* ─── TABS ─── */
+.tabs-bar{display:flex;border-bottom:2px solid var(--bk-border);background:#fff;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:0}
+.tabs-bar::-webkit-scrollbar{display:none}
+.tab-btn{
+  flex-shrink:0;padding:.6rem .85rem;font-size:12px;font-weight:600;
+  color:var(--bk-muted);border:none;background:none;cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;
+  transition:color .15s;
+}
+.tab-btn.active{color:var(--bk-mid);border-bottom-color:var(--bk-mid)}
+.tab-panel{display:none;padding:.85rem}
+.tab-panel.active{display:block}
+
+/* ─── TAB CONTENT STYLES ─── */
+.date-strip{display:flex;align-items:center;gap:8px;background:var(--bk-bg);border-radius:6px;padding:.55rem .8rem;margin-bottom:.65rem;font-size:13px;font-weight:700}
+.date-lbl{font-size:11px;color:var(--bk-muted);font-weight:400}
+.date-nights{color:var(--bk-muted);font-size:11px;font-weight:400;margin-right:auto}
+.address{font-size:11px;color:var(--bk-muted);background:var(--bk-bg);padding:.5rem .8rem;border-radius:6px;margin-bottom:.65rem;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.maps-link{font-size:12px;font-weight:700;color:var(--bk-mid);text-decoration:none;white-space:nowrap;flex-shrink:0}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:.35rem .7rem;margin-bottom:.65rem}
+.lbl{font-size:10px;color:var(--bk-muted);margin-bottom:1px}
+.val{font-size:12px;font-weight:700;color:var(--bk-text)}
+
+/* Score bar (location) */
+.loc-wrap{margin-bottom:.65rem}
+.loc-top{display:flex;justify-content:space-between;font-size:11px;color:var(--bk-muted);margin-bottom:4px}
+.loc-bar{height:6px;border-radius:3px;background:#e7e7e7;overflow:hidden}
+.loc-fill{height:100%;border-radius:3px}
+.fill-g{background:var(--bk-green)}.fill-a{background:#d97706}.fill-r{background:#cc0000}
+
+/* Isolation box */
+.iso-box{border-radius:6px;padding:.65rem .8rem;margin-bottom:.65rem;border:1px solid}
+.iso-ok{background:#f0fdf4;border-color:#86efac}
+.iso-warn{background:#fff7ed;border-color:#fed7aa}
+.iso-title{font-size:13px;font-weight:700;margin-bottom:3px}
+.iso-ok .iso-title{color:#166534}.iso-warn .iso-title{color:#92400e}
+.iso-detail{font-size:11px;color:#555;line-height:1.5}
+.iso-verdict{font-size:11px;font-weight:700;margin-top:4px}
+.iso-ok .iso-verdict{color:#166534}.iso-warn .iso-verdict{color:#92400e}
+
+/* Vibe blocks */
+.vibe-block{border-radius:6px;border:1px solid var(--bk-border);overflow:hidden;margin-bottom:6px}
+.vibe-head{display:flex;align-items:center;gap:7px;padding:.4rem .75rem;background:var(--bk-bg);border-bottom:1px solid var(--bk-border)}
+.vibe-region{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:var(--bk-blue);color:#fff}
+.vibe-title{font-size:11px;font-weight:700;color:var(--bk-muted)}
+.vibe-body{padding:.55rem .75rem}
+.vibe-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}
+.vibe-lbl{font-size:10px;color:var(--bk-muted);margin-bottom:3px}
+.vibe-track{height:5px;background:#e7e7e7;border-radius:3px;overflow:hidden;margin-bottom:2px}
+.vibe-fill{height:100%;border-radius:3px}
+.vfq{background:var(--bk-green)}.vfa{background:#d97706}
+.vibe-val{font-size:11px;font-weight:600;color:var(--bk-text)}
+.vibe-text{font-size:11px;color:#555;line-height:1.5}
+.fit-row{display:flex;align-items:flex-start;gap:5px;margin-bottom:4px;font-size:11px;color:var(--bk-text)}
+.fit-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.dg{background:var(--bk-green)}.da{background:#d97706}.dr{background:#cc0000}
+
+/* Kids score */
+.kids-row{display:flex;align-items:center;gap:12px}
+.kids-num{font-size:32px;font-weight:800;line-height:1}
+.ks-g{color:var(--bk-green)}.ks-a{color:#d97706}.ks-r{color:#cc0000}
+.kids-detail{font-size:12px;color:#555;line-height:1.65}
+
+/* Tags */
+.tags{display:flex;flex-wrap:wrap;gap:5px}
+.tag{display:inline-flex;align-items:center;gap:3px;font-size:11px;padding:5px 10px;border-radius:4px;font-weight:500}
+.tg{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+.tw{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+.tb{background:#fff1f2;color:#991b1b;border:1px solid #fecaca}
+.sec-label{font-size:11px;font-weight:700;color:var(--bk-muted);margin:.75rem 0 .4rem;display:flex;align-items:center;gap:6px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--bk-border)}
+
+/* ─── COMPARISON TAB ─── */
+.cmp-intro{font-size:11px;color:var(--bk-muted);margin-bottom:.75rem;line-height:1.5}
+.cmp-table{width:100%;border-collapse:collapse;margin-bottom:.75rem;font-size:11px}
+.cmp-table th{background:var(--bk-bg);font-weight:700;padding:.45rem .55rem;border:1px solid var(--bk-border);text-align:center;color:var(--bk-text);font-size:10px;text-transform:uppercase;letter-spacing:.3px}
+.cmp-table td{padding:.45rem .55rem;border:1px solid var(--bk-border);text-align:center;vertical-align:middle;color:var(--bk-text)}
+.cmp-table tr.cmp-ours{background:#f0f6ff}
+.cmp-table tr.cmp-ours td{font-weight:700}
+.cmp-name{text-align:right !important;font-weight:600}
+.cmp-ours .cmp-name{color:var(--bk-mid)}
+.cmp-tag{display:inline-block;font-size:9px;padding:1px 6px;border-radius:3px;margin-right:3px;font-weight:700}
+.ct-ours{background:#dbeafe;color:#1d4ed8}
+.ct-b{background:#fef3c7;color:#92400e}
+.ct-c{background:#f3f4f6;color:#374151}
+.cmp-score{font-size:14px;font-weight:800}
+.cs-g{color:var(--bk-green)}.cs-a{color:#d97706}.cs-r{color:#cc0000}
+.cmp-price-note{font-size:10px;color:var(--bk-muted);margin-top:.35rem;line-height:1.5}
+.cmp-verdict{background:#f0f6ff;border:1px solid #c8d8ea;border-right:3px solid var(--bk-mid);border-radius:6px;padding:.6rem .8rem;margin-top:.5rem}
+.cmp-verdict-title{font-size:11px;font-weight:700;color:var(--bk-mid);margin-bottom:4px}
+.cmp-verdict-text{font-size:11px;color:var(--bk-text);line-height:1.55}
+
+/* ─── TRANSFER STRIP ─── */
+.transfer-wrap{margin:0 0 .75rem;position:relative}
+.transfer-divider{
+  display:flex;align-items:center;gap:8px;
+  padding:.3rem 0;
+  font-size:10px;font-weight:600;color:var(--bk-muted);
+  text-transform:uppercase;letter-spacing:.5px;
+}
+.transfer-divider::before,.transfer-divider::after{
+  content:'';flex:1;height:1px;background:var(--bk-border);
+}
+.transfer-strip{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:.65rem .9rem;
+  background:#f8fafc;
+  border:1px solid #c8d8ea;
+  border-radius:8px;
+  border-right:3px solid var(--bk-mid);
+}
+.tx-arrow{font-size:18px;color:var(--bk-mid);flex-shrink:0;margin-top:1px}
+.tx-body{flex:1}
+.tx-date{font-size:10px;color:var(--bk-muted);margin-bottom:2px}
+.tx-label{font-size:13px;font-weight:700;color:var(--bk-text);line-height:1.35;margin-bottom:5px}
+.tx-pills{display:flex;flex-wrap:wrap;gap:5px}
+.tx-pill{background:#e8f0f8;border-radius:4px;padding:3px 8px;font-size:11px;color:#334e6e}
+.tx-pill b{color:var(--bk-blue)}
+
+/* ─── FOOTNOTE ─── */
+.footnote{background:#fff;border:1px solid var(--bk-border);border-radius:6px;padding:.8rem;font-size:12px;color:var(--bk-muted);line-height:1.6}
+
+/* ─── SCROLL TO TOP ─── */
+#scrollTop{position:fixed;bottom:70px;left:16px;width:40px;height:40px;background:var(--bk-blue);color:#fff;border:none;border-radius:50%;font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.3);z-index:4998}
+@media(min-width:800px){#scrollTop{bottom:20px}}
+
+/* ─── LEAFLET CONTAIN ─── */
+.map-col .leaflet-pane,.map-col .leaflet-control{z-index:auto !important}
+.map-col{position:relative}
+/* fix: mobile map element id is routeMapMobile, not routeMap */
+#routeMapMobile{flex:1;min-height:0}
+/* Also fix the wrong selector that was there before */
+.map-col-mobile #routeMap{display:none}
+
+/* ─── OPTION SWITCHER ─── */
+.opt-bar{background:#001f5c;padding:.55rem .85rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.opt-btn{border:2px solid rgba(255,255,255,.3);background:transparent;color:rgba(255,255,255,.65);border-radius:20px;padding:.3rem .9rem;font-size:12px;font-weight:700;cursor:pointer;transition:all .18s;white-space:nowrap}
+.opt-btn.active{background:#febb02;color:#003580;border-color:#febb02}
+.opt-label{font-size:11px;color:rgba(255,255,255,.45);margin-right:auto}
+
+/* Option visibility */
+body.view-opt1 .opt2-only{display:none !important}
+body.view-opt2 .opt1-only{display:none !important}
+
+/* Phi Phi colors */
+.hc-phiphi{background:linear-gradient(135deg,#0c4a6e 0%,#0891b2 55%,#0e7490 100%)}
+.b-phiphi{background:rgba(8,145,178,.88)}
+
+/* ─── OVERVIEW INFO CARDS ─── */
+.ov-grid{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin-bottom:.5rem}
+.ov-card{background:var(--bk-bg);border:1px solid var(--bk-border);border-radius:8px;padding:.6rem .75rem;display:flex;flex-direction:column;gap:3px}
+.ov-card.full{grid-column:1/-1}
+.ov-card.accent{border-right:3px solid var(--bk-mid);background:#f0f6ff}
+.ov-card.green-c{border-right:3px solid var(--bk-green);background:#f0fdf4}
+.ov-card.warn-c{border-right:3px solid #d97706;background:#fff9f0}
+.ov-icon{font-size:15px;line-height:1}
+.ov-lbl{font-size:10px;color:var(--bk-muted);font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.ov-val{font-size:13px;font-weight:700;color:var(--bk-text);line-height:1.3}
+.ov-sub{font-size:11px;color:var(--bk-muted);line-height:1.4}
+</style>
+</head>
+<body class="view-opt2">
+
+<!-- ─── MOBILE ONLY BLOCK ─── -->
+<div class="mobile-block">
+  <div class="mobile-block-icon">📱</div>
+  <div class="mobile-block-title">ניתן לצפות רק במובייל</div>
+  <div class="mobile-block-sub">ההצעה הזו מותאמת לטלפון נייד בלבד.<br>אנא פתח את הקישור מהמכשיר שלך.</div>
+</div>
+
+<!-- ─── PAGE HEADER ─── -->
+<div class="page-header">
+  <h1>✈ חופשה תאילנד — פברואר 2027</h1>
+  <div class="sub">הצעה 6509</div>
+  <div class="agent-card">
+    <div class="agent-avatar" id="agentAvatar">א</div>
+    <div class="agent-info">
+      <div class="agent-name">אורי צייג</div>
+      <div class="agent-title">סוכן נסיעות</div>
+      <div class="agent-phone">050-5198800</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── OPTION SWITCHER ─── -->
+<div class="opt-bar">
+  <span class="opt-label">בחרו הצעה:</span>
+  <button class="opt-btn" id="optBtn1" onclick="setOption(1)">הצעה 1</button>
+  <button class="opt-btn active" id="optBtn2" onclick="setOption(2)">הצעה 2</button>
+</div>
+
+<!-- ─── STICKY NAV = JOURNEY — הצעה 1 ─── -->
+<nav class="sticky-nav opt1-only" id="stickyNav" style="display: none;">
+  <a class="sn-stop active" href="#hotel1" id="snav1">
+    <span>📍 קראבי</span>
+    <span class="sn-stop-score">7/10</span>
+  </a>
+  <div class="sn-arrow by-car">
+    <span class="sn-arrow-icon">🚗</span>
+    <span class="sn-arrow-km">125ק"מ · ~2h</span>
+  </div>
+  <a class="sn-stop" href="#hotel2" id="snav2">
+    <span>📍 קאו לאק</span>
+    <span class="sn-stop-score">5/10</span>
+  </a>
+  <div class="sn-arrow by-car">
+    <span class="sn-arrow-icon">🚗</span>
+    <span class="sn-arrow-km">85ק"מ · 1:15h</span>
+  </div>
+  <a class="sn-stop" href="#hotel3" id="snav3">
+    <span>📍 פוקט</span>
+    <span class="sn-stop-score">8.5/10</span>
+  </a>
+</nav>
+
+<!-- ─── STICKY NAV = JOURNEY — הצעה 2 ─── -->
+<nav class="sticky-nav opt2-only" id="stickyNav2" style="">
+  <a class="sn-stop active" href="#hotel1" id="snav1b">
+    <span>📍 קראבי</span>
+    <span class="sn-stop-score">7/10</span>
+  </a>
+  <div class="sn-arrow by-sea">
+    <span class="sn-arrow-icon">🚢</span>
+    <span class="sn-arrow-km">~1:45h · מעבורת</span>
+  </div>
+  <a class="sn-stop" href="#hotel2b" id="snav2b">
+    <span>📍 פי פי</span>
+    <span class="sn-stop-score">8.4/10</span>
+  </a>
+  <div class="sn-arrow by-sea">
+    <span class="sn-arrow-icon">🚢</span>
+    <span class="sn-arrow-km">~1:30h · מעבורת</span>
+  </div>
+  <a class="sn-stop" href="#hotel3" id="snav3b">
+    <span>📍 פוקט</span>
+    <span class="sn-stop-score">8.5/10</span>
+  </a>
+</nav>
+
+<div class="outer">
+  <!-- ─── CONTENT COLUMN ─── -->
+  <div class="content-col">
+
+    <!-- Trip bar -->
+    <div class="footnote opt1-only" style="margin-bottom: 0.75rem; display: none;">
+      הזוג שלכם: 2 מבוגרים + ילדה בת 12 + תינוקת בת 2 · ארוחת בוקר כלולה בכל 3 המלונות · מחירים בבאט (฿) · לא כולל טיסות<br>
+      <span style="color:#999;font-size:11px">הציון לוקח בחשבון: מיקום · איכות · התאמה לילדים · תמורה למחיר · ביקורות</span>
+    </div>
+    <div class="footnote opt2-only" style="margin-bottom: 0.75rem;">
+      הזוג שלכם: 2 מבוגרים + ילדה בת 12 + תינוקת בת 2 · ארוחת בוקר כלולה בקראבי ובפוקט · <span style="color:#d97706;font-weight:600">⚠ יש לאשר ארוחת בוקר בפי פי</span> · מחירים בבאט (฿) · לא כולל טיסות<br>
+      <span style="color:#999;font-size:11px">הציון לוקח בחשבון: מיקום · איכות · התאמה לילדים · תמורה למחיר · ביקורות</span>
+    </div>
+    <div class="trip-bar">
+      <div class="ts"><div class="ts-val">14 לילות</div><div class="ts-lbl">משך טיול</div></div>
+      <div class="ts"><div class="ts-val">פבר׳ 2027</div><div class="ts-lbl">עונת שיא</div></div>
+      <div class="ts"><div class="ts-val">4 מבוגרים</div><div class="ts-lbl">2 זוגות</div></div>
+      <div class="ts"><div class="ts-val">3 ילדים + תינוק</div><div class="ts-lbl">ילדים</div></div>
+      <div class="ts opt1-only" style="display: none;"><div class="ts-val">฿338,050</div><div class="ts-lbl">סה"כ קרקע</div></div>
+      <div class="ts opt2-only" style=""><div class="ts-val" style="color:#166534">฿330,900</div><div class="ts-lbl">סה"כ קרקע</div></div>
+      <div class="ts"><div class="ts-val">฿3,000</div><div class="ts-lbl">הנחה</div></div>
+    </div>
+
+    <!-- ════ מלון 1 ════ -->
+    <div class="hotel-card" id="hotel1">
+      <div class="hotel-cover hc-krabi">
+        <img src="https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=800&q=70&auto=format&fit=crop" alt="קראבי" loading="lazy" onerror="this.style.opacity=0">
+        <div class="cover-grad"></div>
+        <div class="cover-dest"><span class="dest-badge b-krabi">📍 קראבי</span></div>
+        <div class="cover-scores">
+          <div class="csb"><div class="csb-num a">7</div><div class="csb-lbl">ציון כולל</div></div>
+        </div>
+        <div class="cover-bottom">
+          <div class="cover-stars">★★★★★</div>
+          <div class="cover-title"><span class="c-num n1">1</span>Dusit Thani Krabi Beach Resort</div>
+          <div class="cover-sub-text">Klong Muang Beach · Travelers' Choice 2025</div>
+        </div>
+      </div>
+      <div class="tabs-bar">
+        <button class="tab-btn active" onclick="showTab(&#39;h1&#39;,&#39;overview&#39;,this)">סקירה</button>
+        <button class="tab-btn" onclick="showTab(&#39;h1&#39;,&#39;location&#39;,this)">מיקום</button>
+        <button class="tab-btn" onclick="showTab(&#39;h1&#39;,&#39;vibe&#39;,this)">אופי</button>
+        <button class="tab-btn" onclick="showTab(&#39;h1&#39;,&#39;notes&#39;,this)">הערות</button>
+        <button class="tab-btn" onclick="showTab(&#39;h1&#39;,&#39;compare&#39;,this)">השוואה</button>
+      </div>
+
+      <div id="h1-overview" class="tab-panel active" style="display: block; min-height: 428px;">
+        <div class="ov-grid">
+          <div class="ov-card full accent">
+            <div class="ov-icon">📅</div>
+            <div class="ov-lbl">תאריכי שהייה</div>
+            <div class="ov-val">02.02 — 07.02.2027 <span style="font-weight:400;font-size:12px;color:var(--bk-muted)">· 5 לילות</span></div>
+          </div>
+          <div class="ov-card full">
+            <div class="ov-icon">📍</div>
+            <div class="ov-lbl">כתובת</div>
+            <div class="ov-sub">155 Moo 2, Nong Thale, Mueang Krabi, Krabi 81180</div>
+            <a class="maps-link" style="margin-top:4px;display:inline-block" href="https://www.google.com/maps/search/?api=1&amp;query=Dusit+Thani+Krabi+Beach+Resort" target="_blank">🗺 פתח במפות ›</a>
+          </div>
+          <div class="ov-card">
+            <div class="ov-icon">🏖</div>
+            <div class="ov-lbl">חוף</div>
+            <div class="ov-val">Klong Muang Beach</div>
+            <div class="ov-sub">כ-15 דק' מ-Ao Nang</div>
+          </div>
+          <div class="ov-card">
+            <div class="ov-icon">🛏</div>
+            <div class="ov-lbl">חדר</div>
+            <div class="ov-val">Family Room</div>
+            <div class="ov-sub">2 חדרים</div>
+          </div>
+          <div class="ov-card accent">
+            <div class="ov-icon">💰</div>
+            <div class="ov-lbl">מחיר</div>
+            <div class="ov-val">฿14,500 / לילה</div>
+            <div class="ov-sub">סה"כ ฿145,000</div>
+          </div>
+          <div class="ov-card">
+            <div class="ov-icon">⭐</div>
+            <div class="ov-lbl">TripAdvisor</div>
+            <div class="ov-val">Travelers' Choice 2025</div>
+            <div class="ov-sub">~3,600 ביקורות TripAdvisor</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="h1-location" class="tab-panel" style="display: none; min-height: 428px;">
+        <div class="loc-wrap">
+          <div class="loc-top"><span>ציון מיקום — חוף נפלא אך מנותק, 14 ק"מ מאו נאנג</span><span>6/10</span></div>
+          <div class="loc-bar"><div class="loc-fill fill-a" style="width:60%"></div></div>
+        </div>
+        <div class="iso-box iso-warn">
+          <div class="iso-title">🏖 מרכז התיירות: או נאנג (Ao Nang) — 14 ק"מ</div>
+          <div class="iso-detail">~14 ק"מ ברכב · כ-15 דקות · אין תחבורה ציבורית<br>או נאנג = מסעדות, ברים, חנויות, שוק לילה, יציאות לטיולים</div>
+          <div class="iso-verdict">⚠ בלי רכב שכור — תקועים במלון. לילדים אין לאן ללכת ברגל.</div>
+        </div>
+      </div>
+
+      <div id="h1-vibe" class="tab-panel" style="display: none; min-height: 428px;">
+        <div class="vibe-block">
+          <div class="vibe-head"><span class="vibe-region">קראבי</span><span class="vibe-title">אופי האזור</span></div>
+          <div class="vibe-body">
+            <div class="vibe-grid">
+              <div><div class="vibe-lbl">🔇 שקט האזור</div><div class="vibe-track"><div class="vibe-fill vfq" style="width:85%"></div></div><div class="vibe-val">שקט ואיכותי</div></div>
+              <div><div class="vibe-lbl">🏃 פעילות תיירותית</div><div class="vibe-track"><div class="vibe-fill vfa" style="width:55%"></div></div><div class="vibe-val">בינוני — מ-Ao Nang</div></div>
+            </div>
+            <div class="vibe-text">מצוקי גיר, חופים מרהיבים, טיולי אי מ-Ao Nang · פחות מסחרי מפוקט · אין חיי לילה</div>
+          </div>
+        </div>
+        <div class="vibe-block">
+          <div class="vibe-head"><span class="vibe-title">🏨 אופי המלון — Dusit Thani Krabi</span></div>
+          <div class="vibe-body">
+            <div class="vibe-grid">
+              <div><div class="vibe-lbl">🔇 שקט המלון</div><div class="vibe-track"><div class="vibe-fill vfq" style="width:90%"></div></div><div class="vibe-val">9/10 — שקט ואלגנטי</div></div>
+              <div><div class="vibe-lbl">👨‍👩‍👧 אווירה</div><div class="vibe-track"><div class="vibe-fill vfa" style="width:40%"></div></div><div class="vibe-val">משפחות + זוגות</div></div>
+            </div>
+            <div class="fit-row"><div class="fit-dot dg"></div><span>מתאים למשפחה שרוצה חוף שקט, ספא ומנוחה אמיתית</span></div>
+            <div class="fit-row"><div class="fit-dot dr"></div><span>לא מתאים אם הילדים רוצים לצאת לעיר — חייבים רכב שכור</span></div>
+          </div>
+        </div>
+        <div class="vibe-block">
+          <div class="vibe-head"><span class="vibe-title">👧 ציון לילדים</span></div>
+          <div class="vibe-body">
+            <div class="kids-row">
+              <div class="kids-num ks-a">7<span style="font-size:14px">/10</span></div>
+              <div class="kids-detail">✓ Family Room · חוף שקט ובטוח · 2 בריכות<br>✗ בלי רכב — לילדים אין לאן ללכת ברגל</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="h1-notes" class="tab-panel" style="display: none; min-height: 428px;">
+        <div class="tags">
+          <span class="tag tg">✓ מלון אמין — רשת Dusit International</span>
+          <span class="tag tg">✓ Family Room עם מיטה זוגית + מיטות יחיד</span>
+          <span class="tag tg">✓ חוף שקט, נקי וכמעט פרטי</span>
+          <span class="tag tg">✓ צוות אדיב ומקצועי</span>
+          <span class="tag tg">✓ חדרים נקיים ומרווחים</span>
+          <span class="tag tg">✓ שירות באגי חינמי בתוך האתר הגדול</span>
+          <span class="tag tg">✓ מסעדה איטלקית ותאילנדית במקום</span>
+          <span class="tag tb">✗ 14 ק"מ מאו נאנג — ילדים לא יכולים ברגל</span>
+          <span class="tag tw">⚠ המתחם ענק — נסיעות באגי בין הבניינים</span>
+        </div>
+      </div>
+      <div id="h1-compare" class="tab-panel" style="display: none; min-height: 428px;">
+        <div class="cmp-intro">מלונות 5 כוכבים באזור Klong Muang Beach · קראבי · עד 10 ק"מ</div>
+        <table class="cmp-table">
+          <thead>
+            <tr>
+              <th style="text-align:right">מלון</th>
+              <th>ציון כולל</th>
+              <th>לילדים</th>
+              <th>מיקום</th>
+              <th>מחיר ממוצע</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="cmp-ours">
+              <td class="cmp-name">Dusit Thani Krabi <span class="cmp-tag ct-ours">ההצעה שלנו</span></td>
+              <td><span class="cmp-score cs-a">7</span></td>
+              <td><span class="cmp-score cs-a">7</span></td>
+              <td><span class="cmp-score cs-a">6</span></td>
+              <td>฿14,500</td>
+            </tr>
+            <tr>
+              <td class="cmp-name">Phulay Bay (Ritz-Carlton) <span class="cmp-tag ct-b">יוקרה</span></td>
+              <td><span class="cmp-score cs-g">9.5</span></td>
+              <td><span class="cmp-score cs-a">6</span></td>
+              <td><span class="cmp-score cs-g">8</span></td>
+              <td>฿38,000+</td>
+            </tr>
+            <tr>
+              <td class="cmp-name">Sofitel Krabi Phokeethra</td>
+              <td><span class="cmp-score cs-g">8.5</span></td>
+              <td><span class="cmp-score cs-g">8</span></td>
+              <td><span class="cmp-score cs-a">7</span></td>
+              <td>฿9,500</td>
+            </tr>
+            <tr>
+              <td class="cmp-name">Holiday Inn Resort Krabi</td>
+              <td><span class="cmp-score cs-a">7.5</span></td>
+              <td><span class="cmp-score cs-g">9</span></td>
+              <td><span class="cmp-score cs-g">8.5</span></td>
+              <td>฿5,500</td>
+            </tr>
+            <tr>
+              <td class="cmp-name">Holiday Inn Resort Krabi</td>
+              <td><span class="cmp-score cs-a">7</span></td>
+              <td><span class="cmp-score cs-g">9</span></td>
+              <td><span class="cmp-score cs-g">8.5</span></td>
+              <td>฿5,000</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="cmp-price-note">* מחירים ממוצעים לחדר ללילה לפי booking.com פבר׳ 2027 — עשויים להשתנות</div>
+        <div class="cmp-verdict">
+          <div class="cmp-verdict-title">🧐 מה מקבלים ב-Dusit Thani ביחס לאחרים?</div>
+          <div class="cmp-verdict-text">
+            ה-Dusit Thani ממוקם בחוף שקט ופרטי יותר מה-Holiday Inn, אבל נגישות העיר פחותה. ה-Holiday Inn בכניסה לאו נאנג — נגיש יותר לילדים, מחיר נמוך יותר. ה-Sofitel מאיכות גבוהה יותר, אך ה-Dusit Thani מנצח בשקט וב-Family Room שלם.
+          </div>
+        </div>
+      </div>
+    </div><!-- /hotel1 -->
+
+    <!-- העברה 1 — הצעה 1 -->
+    <div class="transfer-wrap opt1-only" style="display: none;">
+      <div class="transfer-divider">🚗 מעבר בין מלונות — 07.02.2027</div>
+      <div class="transfer-strip">
+        <div class="tx-arrow">🚗</div>
+        <div class="tx-body">
+          <div class="tx-date">יציאה מקראבי · כניסה לקאו לאק</div>
+          <div class="tx-label">Klong Muang → Lam Kaen Beach</div>
+          <div class="tx-pills">
+            <div class="tx-pill">⏱ <b>~1:45 שעות</b></div>
+            <div class="tx-pill">📍 <b>~125 ק"מ</b></div>
+            <div class="tx-pill">🛣 Route 4 צפונה — ברכב פרטי</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- העברה 1 — הצעה 2 -->
+    <div class="transfer-wrap opt2-only" style="">
+      <div class="transfer-divider">🚢 מעבורת — 07.02.2027</div>
+      <div class="transfer-strip">
+        <div class="tx-arrow">🚢</div>
+        <div class="tx-body">
+          <div class="tx-date">יציאה מקראבי · כניסה לקו פי פי</div>
+          <div class="tx-label">Ao Nang / Krabi Pier → Koh Phi Phi Don</div>
+          <div class="tx-pills">
+            <div class="tx-pill">⏱ <b>~1:45 שעות</b></div>
+            <div class="tx-pill">🚢 <b>מעבורת ישירה</b></div>
+            <div class="tx-pill">🧳 לגישה למלון — לונגטייל בוט קצר</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ מלון 2 ════ -->
+    <div class="hotel-card warn opt1-only" id="hotel2" style="display: none;">
+      <div class="hotel-cover hc-khaolak">
+        <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=70&auto=format&fit=crop" alt="קאו לאק" loading="lazy" onerror="this.style.opacity=0">
+        <div class="cover-grad"></div>
+        <div class="cover-dest"><span class="dest-badge b-khaolak">📍 קאו לאק</span></div>
+        <div class="cover-scores">
+          <div class="csb"><div class="csb-num r">5</div><div class="csb-lbl">ציון כולל</div></div>
+        </div>
+        <div class="cover-bottom">
+          <div class="cover-stars">★★★★★</div>
+          <div class="cover-title"><span class="c-num n2">2</span>Kalima Resort &amp; Villas Khao Lak</div>
+          <div class="cover-sub-text">Lam Kaen Beach · 2,514 ביקורות ב-Booking.com</div>
+        </div>
+      </div>
+      <div class="tabs-bar">
+        <button class="tab-btn active" onclick="showTab(&#39;h2&#39;,&#39;overview&#39;,this)">סקירה</button>
+        <button class="tab-btn" onclick="showTab(&#39;h2&#39;,&#39;location&#39;,this)">מיקום</button>
+        <button class="tab-btn" onclick="showTab(&#39;h2&#39;,&#39;vibe&#39;,this)">אופי</button>
+        <button class="tab-btn" onclick="showTab(&#39;h2&#39;,&#39;notes&#39;,this)">הערות</button>
+        <button class="tab-btn" onclick="showTab(&#39;h2&#39;,&#39;compare&#39;,this)">השוואה</button>
+      </div>
+
+      <div id="h2-overview" class="tab-panel active" style="display: block; min-height: 424px;">
+        <div class="ov-grid">
+          <div class="ov-card full accent">
+            <div class="ov-icon">📅</div>
+            <div class="ov-lbl">תאריכי שהייה</div>
+            <div class="ov-val">07.02 — 10.02.2027 <span style="font-weight:400;font-size:12px;color:var(--bk-muted)">· 3 לילות</span></div>
+          </div>
+          <div class="ov-card full">
+            <div class="ov-icon">📍</div>
+            <div class="ov-lbl">כתובת</div>
+            <div class="ov-sub">3/88 Moo 2, Petchkasem Rd, Ban Khao Lak, Phang Nga 82210</div>
+            <a class="maps-link" style="margin-top:4px;display:inline-block" href="https://www.google.com/maps/search/?api=1&amp;query=Kalima+Resort+and+Villas+Khao+Lak" target="_blank">🗺 פתח במפות ›</a>
+          </div>
+          <div class="ov-card">
+            <div class="ov-icon">🏖</div>
+            <div class="ov-lbl">חוף</div>
+            <div class="ov-val">Lam Kaen Beach</div>
+            <div class="ov-sub">15 דק' שאטל לשוק</div>
+          </div>
+          <div class="ov-card">
+            <div class="ov-icon">🛏</div>
+            <div class="ov-lbl">חדר</div>
+            <div class="ov-val">Grand Deluxe</div>
+            <div class="ov-sub">2 חדרים</div>
+          </div>
+          <div class="ov-card accent">
+            <div class="ov-icon">💰</div>
+            <div class="ov-lbl">מחיר</div>
+            <div class="ov-val">฿6,600 / לילה</div>
+            <div class="ov-sub">סה"כ ฿46,050</div>
+          </div>
+          <div class="ov-card">
+            <div class="ov-icon">⭐</div>
+            <div class="ov-lbl">Booking.com</div>
+            <div class="ov-val">8.9 / 10</div>
+            <div class="ov-sub">2,514 ביקורות</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="h2-location" class="tab-panel" style="display: none; min-height: 424px;">
+        <div class="loc-wrap">
+          <div class="loc-top"><span>ציון מיקום — מנותק לחלוטין</span><span>5/10</span></div>
+          <div class="loc-bar"><div class="loc-fill fill-r" style="width:50%"></div></div>
+        </div>
+        <div class="iso-box iso-warn">
+          <div class="iso-title">🏘 מרכז התיירות: Bang Niang — ~7 ק"מ</div>
+          <div class="iso-detail">~7 ק"מ · ~15 דקות שאטל · אין תחבורה ציבורית<br>Bang Niang = שוק לילה, מסעדות, חנויות — אזור שקט ממילא</div>
+          <div class="iso-verdict">✗ הכי מבודד מהשלושה. קאו לאק כולה שקטה — אין "מרכז" של ממש.</div>
+        </div>
+      </div>
+
+      <div id="h2-vibe" class="tab-panel" style="display: none; min-height: 424px;">
+        <div class="vibe-block">
+          <div class="vibe-head"><span class="vibe-region">קאו לאק</span><span class="vibe-title">אופי האזור</span></div>
+          <div class="vibe-body">
+            <div class="vibe-grid">
+              <div><div class="vibe-lbl">🔇 שקט האזור</div><div class="vibe-track"><div class="vibe-fill vfq" style="width:100%"></div></div><div class="vibe-val">השקט ביותר</div></div>
+              <div><div class="vibe-lbl">🏃 פעילות</div><div class="vibe-track"><div class="vibe-fill vfa" style="width:20%"></div></div><div class="vibe-val">מינימלי — כפרי</div></div>
+            </div>
+            <div class="vibe-text">עיירת חוף שקטה ואותנטית · כמעט ללא חיי לילה · קרוב לפארק לאומי Khao Sok</div>
+          </div>
+        </div>
+        <div class="vibe-block">
+          <div class="vibe-head"><span class="vibe-title">🏨 אופי המלון — Kalima Resort</span></div>
+          <div class="vibe-body">
+            <div class="vibe-grid">
+              <div><div class="vibe-lbl">🔇 שקט המלון</div><div class="vibe-track"><div class="vibe-fill vfq" style="width:95%"></div></div><div class="vibe-val">10/10 — בידוד מלא</div></div>
+              <div><div class="vibe-lbl">👨‍👩‍👧 אווירה</div><div class="vibe-track"><div class="vibe-fill vfa" style="width:30%"></div></div><div class="vibe-val">בעיקר זוגות</div></div>
+            </div>
+            <div class="fit-row"><div class="fit-dot dg"></div><span>מתאים למי שרוצה לנתק לחלוטין — שקט, טבע, ספא</span></div>
+            <div class="fit-row"><div class="fit-dot dr"></div><span>לא מתאים לילדים שרוצים פעילות ותנועה</span></div>
+            <div class="fit-row"><div class="fit-dot dr"></div><span>אין Family Room — פחות מותאם לתינוקת בת 2</span></div>
+          </div>
+        </div>
+        <div class="vibe-block">
+          <div class="vibe-head"><span class="vibe-title">👧 ציון לילדים</span></div>
+          <div class="vibe-body">
+            <div class="kids-row">
+              <div class="kids-num ks-r">4<span style="font-size:14px">/10</span></div>
+              <div class="kids-detail">✓ חוף פרטי · בריכות · ספא<br>✗ אין Family Room · בידוד מלא · לא מותאם לתינוקת</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="h2-notes" class="tab-panel" style="display: none; min-height: 424px;">
+        <div class="tags">
+          <span class="tag tg">✓ חדרים מרווחים ועיצוב מודרני</span>
+          <span class="tag tg">✓ מספר בריכות וספא</span>
+          <span class="tag tg">✓ חוף פרטי ישיר</span>
+          <span class="tag tb">✗ Grand Deluxe ולא Family Room</span>
+          <span class="tag tb">✗ ~7 ק"מ מהשוק — שאטל בלבד</span>
+          <span class="tag tw">⚠ ביקורות מעורבות ב-TripAdvisor</span>
+          <span class="tag tw">⚠ תוספות ואוכל יקרים לפי ביקורות</span>
+        </div>
+      </div>
+      <div id="h2-compare" class="tab-panel" style="display: none; min-height: 424px;">
+        <div class="cmp-intro">מלונות 5 כוכבים באזור קאו לאק · עד 10 ק"מ</div>
+        <table class="cmp-table">
+          <thead>
+            <tr>
+              <th style="text-align:right">מלון</th>
+              <th>ציון כולל</th>
+              <th>לילדים</th>
+              <th>מיקום</th>
+              <th>מחיר ממוצע</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="cmp-ours">
+              <td class="cmp-name">Kalima Resort &amp; Villas <span class="cmp-tag ct-ours">ההצעה שלנו</span></td>
+              <td><span class="cmp-score cs-r">5</span></td>
+              <td><span class="cmp-score cs-r">4</span></td>
+              <td><span class="cmp-score cs-r">5</span></td>
+              <td>฿6,600</td>
+            </tr>
+            <tr>
+              <td class="cmp-name">JW Marriott Khao Lak <span class="cmp-tag ct-b">מומלץ</span></td>
+              <td><span class="cmp-score cs-g">9</span></td>
+              <td><span class="cmp-score cs-g">9</span></td>
+              <td><span class="cmp-score cs-a">7</span></td>
+              <td>฿14,000</td>
+            </tr>
+            <tr>
+              <td class="cmp-name">Le Méridien Khao Lak</td>
+              <td><span class="cmp-score cs-g">8.5</span></td>
+              <td><span class="cmp-score cs-g">9</span></td>
+              <td><span class="cmp-score cs-a">7</span></td>
+              <td>฿10,500</td>
+            </tr>
+            <tr>
+              <td class="cmp-name">Santhiya Khao Lak Resort</td>
+              <td><span class="cmp-score cs-g">9</span></td>
+              <td><span class="cmp-score cs-a">7</span></td>
+              <td><span class="cmp-score cs-a">6</span></td>
+              <td>฿13,000</td>
+            </tr>
+            <tr>
+              <td class="cmp-name">Similana Resort</td>
+              <td><span class="cmp-score cs-a">7</span></td>
+              <td><span class="cmp-score cs-a">6</span></td>
+              <td><span class="cmp-score cs-a">6</span></td>
+              <td>฿4,500</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="cmp-price-note">* מחירים ממוצעים לחדר ללילה לפי booking.com פבר׳ 2027 — עשויים להשתנות</div>
+        <div class="cmp-verdict">
+          <div class="cmp-verdict-title">⚠ מה מקבלים ב-Kalima ביחס לאחרים?</div>
+          <div class="cmp-verdict-text">
+            ה-Kalima הוא האפשרות החלשה ביותר מבין חמשת המלונות באזור. ה-JW Marriott וה-Le Méridien מציעים Family Room, ציון לילדים גבוה בהרבה ושירות ברמה גבוהה יותר — במחיר גבוה משמעותית. אם 3 לילות בלבד בקאו לאק, יכול להיות שווה לשדרג ל-Le Méridien על חשבון חיסכון במקום אחר.
+          </div>
+        </div>
+      </div>
+    </div><!-- /hotel2 -->
+
+    <!-- ════ הערת סוכן — הצעה 2 ════ -->
+    <div class="agent-note opt2-only" style="">
+      <div class="agent-note-avatar" style="background:#fef3c7;display:flex;align-items:center;justify-content:center;font-weight:800;color:#92400e">א</div>
+      <div class="agent-note-body">
+        <div class="agent-note-from">💬 הערה מאורי הסוכן</div>
+        <div class="agent-note-text">כפיר לא נתן לי מספיק זמן כדי למצוא מלון יותר קרוב למרכז — אבל המלון שהצעתי כאן הוא חוויה של אי בודד לשלושה ימים, במיקום הכי מושלם באזור 🌴</div>
+      </div>
+    </div>
+
+    <!-- ════ מלון 2 — הצעה 2: פי פי ════ -->
+    <div class="hotel-card opt2-only" id="hotel2b" style="">
+      <div class="hotel-cover hc-phiphi">
+        <img src="https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=800&q=70&auto=format&fit=crop" alt="קו פי פי" loading="lazy" onerror="this.style.opacity=0">
+        <div class="cover-grad"></div>
+        <div class="cover-dest"><span class="dest-badge b-phiphi">📍 קו פי פי</span></div>
+        <div class="cover-scores">
+          <div class="csb"><div class="csb-num g">8.4</div><div class="csb-lbl">ציון כולל</div></div>
+        </div>
+        <div class="cover-bottom">
+          <div class="cover-stars">★★★</div>
+          <div class="cover-title"><span class="c-num" style="background:#cffafe;color:#0e7490;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:800;margin-left:5px;vertical-align:middle">2</span>Phi Phi Natural Resort</div>
+          <div class="cover-sub-text">Laem Tong Beach · Koh Phi Phi Don · Booking.com 8.4</div>
+        </div>
+      </div>
+      <div class="tabs-bar">
+        <button class="tab-btn active" onclick="showTab(&#39;h2b&#39;,&#39;overview&#39;,this)">סקירה</button>
+        <button class="tab-btn" onclick="showTab(&#39;h2b&#39;,&#39;location&#39;,this)">מיקום</button>
+        <button class="tab-btn" onclick="showTab(&#39;h2b&#39;,&#39;vibe&#39;,this)">אופי</button>
+        <button class="tab-btn" onclick="showTab(&#39;h2b&#39;,&#39;notes&#39;,this)">הערות</button>
+        <button class="tab-btn" onclick="showTab(&#39;h2b&#39;,&#39;compare&#39;,this)">השוואה</button>
+      </div>
+
+      <div id="h2b-overview" class="tab-panel active" style="display: block; min-height: 531px;">
+        <div class="ov-grid">
+          <div class="ov-card full accent">
+            <div class="ov-icon">📅</div>
+            <div class="ov-lbl">תאריכי שהייה</div>
+            <div class="ov-val">07.02 — 10.02.2027 <span style="font-weight:400;font-size:12px;color:var(--bk-muted)">· 3 לילות</span></div>
+          </div>
+          <div class="ov-card full">
+            <div class="ov-icon">📍</div>
+            <div class="ov-lbl">מיקום</div>
+            <div class="ov-val">Laem Tong Beach</div>
+            <div class="ov-sub">קצה צפוני של קו פי פי דון · גישה בלונגטייל בלבד</div>
+            <a class="maps-link" style="margin-top:4px;display:inline-block" href="https://www.google.com/maps/search/?api=1&amp;query=Phi+Phi+Natural+Resort+Laem+Tong" target="_blank">🗺 פתח במפות ›</a>
+          </div>
+          <div class="ov-card">
+            <div class="ov-icon">🏖</div>
+            <div class="ov-lbl">חוף</div>
+            <div class="ov-val">Private Beach</div>
+            <div class="ov-sub">חוף ישיר מהחדר</div>
+          </div>
+          <div class="ov-card">
+            <div class="ov-icon">🛏</div>
+            <div class="ov-lbl">חדר</div>
+            <div class="ov-val">Superior Cottage Triple</div>
+            <div class="ov-sub">52 מ"ר · 2 יחידות</div>
+          </div>
+          <div class="ov-card accent">
+            <div class="ov-icon">💰</div>
+            <div class="ov-lbl">מחיר</div>
+            <div class="ov-val">₪2,160 / יחידה ל-3 לילות</div>
+            <div class="ov-sub">סה"כ ₪4,320 ≈ ฿38,900</div>
+          </div>
+          <div class="ov-card">
+            <div class="ov-icon">⭐</div>
+            <div class="ov-lbl">Booking.com</div>
+            <div class="ov-val">8.4 / 10</div>
+            <div class="ov-sub">891 ביקורות · קוטג' עם נוף לחוף</div>
+          </div>
+          <div class="ov-card full green-c">
+            <div class="ov-icon">💸</div>
+            <div class="ov-lbl">חיסכון לעומת קאו לאק</div>
+            <div class="ov-val">฿7,150 מתחת לתקציב המאושר</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="h2b-location" class="tab-panel" style="display: none; min-height: 531px;">
+        <div class="loc-wrap">
+          <div class="loc-top"><span>ציון מיקום — Laem Tong Beach, קצה צפוני מבודד</span><span>7/10</span></div>
+          <div class="loc-bar"><div class="loc-fill fill-a" style="width:70%"></div></div>
+        </div>
+        <div class="iso-box iso-ok">
+          <div class="iso-title">🏖 Laem Tong Beach — חוף פרטי ושקט</div>
+          <div class="iso-detail">המלון ממוקם בקצה הצפוני של האי · חוף ישיר מהקוטג' · ללא הרעש של Ton Sai<br>שכנים בלעדיים: SAii / Island Village Resort, Zeavola — אזור שקט ויוקרתי</div>
+          <div class="iso-verdict">✓ הפרטיות הרבה ביותר שניתן לקבל בפי פי · מושלם לילדים</div>
+        </div>
+        <div class="iso-box iso-warn" style="margin-top:.5rem">
+          <div class="iso-title">⚠ Ton Sai Village — מרכז האי — ~45 דק' בלונגטייל</div>
+          <div class="iso-detail">Ton Sai = מסעדות, ברים, חנויות, בתי צלילה, תחנת מעבורת<br>עלות לונגטייל: ~900 ב"ת לכיוון אחד · אין הליכה — רק סירה</div>
+          <div class="iso-verdict">→ טיול ל-Ton Sai דורש תכנון ועלות נוספת — לא ספונטני</div>
+        </div>
+        <div class="iso-box iso-warn" style="margin-top:.5rem">
+          <div class="iso-title">⚠ לוגיסטיקת נסיעה — חשוב לדעת</div>
+          <div class="iso-detail">
+            מעבורת מקראבי / פוקט → נוחתת ב-Ton Sai Pier (לא ב-Laem Tong)<br>
+            משם: לונגטייל נוסף ~45 דק' (900 ב"ת) — או שירות ישיר מול Andaman Wave Master<br>
+            לקראבי: ~1:45h · לפוקט: ~1:30h (זמני מעבורת מ-Ton Sai, לא כולל לונגטייל)
+          </div>
+          <div class="iso-verdict">→ יש לוודא שהסעות למלון מתואמות מראש עם הסוכנות</div>
+        </div>
+        <div class="iso-box iso-ok" style="margin-top:.5rem">
+          <div class="iso-title">✓ אין רכבים בכל קו פי פי — בטוח לילדים</div>
+          <div class="iso-detail">הנגשת האי כולה בסירות ורגל · אין תנועת רכבים בשום חלק של האי</div>
+          <div class="iso-verdict">✓ אטרקציות: Maya Bay, סנורקלינג, Viking Cave — כולן בסירה מהחוף</div>
+        </div>
+      </div>
+
+      <div id="h2b-vibe" class="tab-panel" style="display: none; min-height: 531px;">
+        <div class="vibe-block">
+          <div class="vibe-head"><span class="vibe-region" style="background:#0891b2">פי פי</span><span class="vibe-title">אופי האזור</span></div>
+          <div class="vibe-body">
+            <div class="vibe-grid">
+              <div><div class="vibe-lbl">🔇 שקט האזור</div><div class="vibe-track"><div class="vibe-fill vfq" style="width:40%"></div></div><div class="vibe-val">בינוני — עונת שיא</div></div>
+              <div><div class="vibe-lbl">🏃 פעילות תיירותית</div><div class="vibe-track"><div class="vibe-fill vfa" style="width:90%"></div></div><div class="vibe-val">גבוה מאוד</div></div>
+            </div>
+            <div class="vibe-text">סנורקלינג וצלילה עולמיים · Maya Bay · טיולי אי · שוק לילה ב-Ton Sai (45 דק' לונגטייל) · אין רכבים באי · נוף מרהיב</div>
+          </div>
+        </div>
+        <div class="vibe-block">
+          <div class="vibe-head"><span class="vibe-title">🏨 אופי המלון — Phi Phi Natural Resort</span></div>
+          <div class="vibe-body">
+            <div class="vibe-grid">
+              <div><div class="vibe-lbl">🔇 שקט המלון</div><div class="vibe-track"><div class="vibe-fill vfq" style="width:80%"></div></div><div class="vibe-val">8/10 — קוטג' בחוף</div></div>
+              <div><div class="vibe-lbl">👨‍👩‍👧 אווירה</div><div class="vibe-track"><div class="vibe-fill vfa" style="width:70%"></div></div><div class="vibe-val">משפחות + זוגות</div></div>
+            </div>
+            <div class="fit-row"><div class="fit-dot dg"></div><span>חוף פרטי ישיר מהקוטג' — ייחודי בפי פי</span></div>
+            <div class="fit-row"><div class="fit-dot dg"></div><span>אין רכבים — ילדים חופשיים לרוץ בחוף</span></div>
+            <div class="fit-row"><div class="fit-dot da"></div><span>3 כוכבים — שירות ומתקנים פחות מ-5 כוכבים</span></div>
+          </div>
+        </div>
+        <div class="vibe-block">
+          <div class="vibe-head"><span class="vibe-title">👧 ציון לילדים</span></div>
+          <div class="vibe-body">
+            <div class="kids-row">
+              <div class="kids-num ks-g">8<span style="font-size:14px">/10</span></div>
+              <div class="kids-detail">✓ חוף פרטי · סנורקלינג מהחוף · אין רכבים<br>✓ חווית אי אמיתית · ייחודי ובלתי נשכח<br>⚠ 3 כוכבים — פחות מתקנים ממלונות 5*</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="h2b-notes" class="tab-panel" style="display: none; min-height: 531px;">
+        <div class="tags">
+          <span class="tag tg">✓ חוף פרטי ישיר מהקוטג' — נדיר בפי פי</span>
+          <span class="tag tg">✓ Superior Cottage Triple 52 מ"ר</span>
+          <span class="tag tg">✓ אין רכבים באי — בטוח לילדים</span>
+          <span class="tag tg">✓ Booking.com 8.4 — ציון גבוה (891 ביקורות)</span>
+          <span class="tag tg">✓ מחיר מתחת לתקציב — חיסכון ฿7,150</span>
+          <span class="tag tg">✓ חווית אי ייחודית — לא ניתן לשחזר בקאו לאק</span>
+          <span class="tag tg">✓ Laem Tong Beach — שקט ומבודד, ללא הצפיפות של Ton Sai</span>
+          <span class="tag tw">⚠ יש לאשר: האם ארוחת בוקר כלולה</span>
+          <span class="tag tw">⚠ יש לאשר: תנאי ביטול</span>
+          <span class="tag tw">⚠ לוגיסטיקה: לונגטייל 45 דק' (900 ב"ת) מ-Ton Sai — יש לתאם מראש</span>
+          <span class="tag tw">⚠ הסעות יש לתאם מראש — מעבורת מגיעה ל-Ton Sai, לא ל-Laem Tong</span>
+          <span class="tag tb">✗ 3 כוכבים — לא 5 כוכבים כמו שאר המסלול</span>
+          <span class="tag tb">✗ מרחק מ-Ton Sai: 45 דק' לונגטייל · 900 ב"ת לכיוון</span>
+        </div>
+      </div>
+
+      <div id="h2b-compare" class="tab-panel" style="display: none; min-height: 531px;">
+        <div class="cmp-intro">מלונות באזור קו פי פי דון · כל האי (אין מגבלת ק"מ)</div>
+        <table class="cmp-table">
+          <thead>
+            <tr>
+              <th style="text-align:right">מלון</th>
+              <th>ציון כולל</th>
+              <th>לילדים</th>
+              <th>מיקום</th>
+              <th>מחיר/לילה</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="cmp-ours">
+              <td class="cmp-name">Phi Phi Natural Resort <span class="cmp-tag ct-ours">ההצעה שלנו</span></td>
+              <td><span class="cmp-score cs-g">8.4</span></td>
+              <td><span class="cmp-score cs-g">8</span></td>
+              <td><span class="cmp-score cs-a">7</span></td>
+              <td>฿6,500</td>
+            </tr>
+            <tr>
+              <td class="cmp-name">Phi Phi Island Village Beach Resort <span class="cmp-tag ct-b">מומלץ</span></td>
+              <td><span class="cmp-score cs-g">9</span></td>
+              <td><span class="cmp-score cs-g">9</span></td>
+              <td><span class="cmp-score cs-g">8</span></td>
+              <td>฿9,000</td>
+            </tr>
+            <tr>
+              <td class="cmp-name">Holiday Inn Resort Phi Phi Island</td>
+              <td><span class="cmp-score cs-g">8</span></td>
+              <td><span class="cmp-score cs-g">8.5</span></td>
+              <td><span class="cmp-score cs-a">7</span></td>
+              <td>฿7,500</td>
+            </tr>
+            <tr>
+              <td class="cmp-name">Zeavola Resort <span class="cmp-tag ct-b">בוטיק יוקרה</span></td>
+              <td><span class="cmp-score cs-g">9.5</span></td>
+              <td><span class="cmp-score cs-a">5</span></td>
+              <td><span class="cmp-score cs-a">6</span></td>
+              <td>฿22,000+</td>
+            </tr>
+            <tr>
+              <td class="cmp-name">Phi Phi Cabana Hotel</td>
+              <td><span class="cmp-score cs-a">7</span></td>
+              <td><span class="cmp-score cs-a">6</span></td>
+              <td><span class="cmp-score cs-g">9.5</span></td>
+              <td>฿2,500</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="cmp-price-note">* מחירים ממוצעים לחדר ללילה לפי booking.com פבר׳ 2027 — עשויים להשתנות</div>
+        <div class="cmp-verdict">
+          <div class="cmp-verdict-title">✅ מה מקבלים ב-Phi Phi Natural Resort ביחס לאחרים?</div>
+          <div class="cmp-verdict-text">
+            ה-Phi Phi Natural Resort מציע חוף פרטי ב-Laem Tong עם ציון 8.4 ומחיר נגיש — שילוב נדיר. ה-Island Village (SAii) מצוין יותר אך עולה ~฿2,500 יותר ללילה. ה-Zeavola יוקרתי ומוכוון לזוגות בלבד. הקבאנה ב-Ton Sai — זול אך ללא חוף פרטי ובאזור הצפוף. שים לב: כולם ב-3 כוכבים לעומת 5 כוכבים בשאר המסלול.
+          </div>
+        </div>
+      </div>
+    </div><!-- /hotel2b -->
+
+    <!-- העברה 2 — הצעה 1 -->
+    <div class="transfer-wrap opt1-only" style="display: none;">
+      <div class="transfer-divider">🚗 מעבר בין מלונות — 10.02.2027</div>
+      <div class="transfer-strip">
+        <div class="tx-arrow">🚗</div>
+        <div class="tx-body">
+          <div class="tx-date">יציאה מקאו לאק · כניסה לפוקט</div>
+          <div class="tx-label">Lam Kaen Beach → Kata Noi, פוקט</div>
+          <div class="tx-pills">
+            <div class="tx-pill">⏱ <b>~1:15 שעות</b></div>
+            <div class="tx-pill">📍 <b>~85 ק"מ</b></div>
+            <div class="tx-pill">🛣 Route 4 + גשר Sarasin — ברכב פרטי</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- העברה 2 — הצעה 2 -->
+    <div class="transfer-wrap opt2-only" style="">
+      <div class="transfer-divider">🚢 מעבורת — 10.02.2027</div>
+      <div class="transfer-strip">
+        <div class="tx-arrow">🚢</div>
+        <div class="tx-body">
+          <div class="tx-date">יציאה מקו פי פי · כניסה לפוקט</div>
+          <div class="tx-label">Koh Phi Phi Don → Phuket Rassada Pier</div>
+          <div class="tx-pills">
+            <div class="tx-pill">⏱ <b>~1:30 שעות</b></div>
+            <div class="tx-pill">🚢 <b>מעבורת ישירה</b></div>
+            <div class="tx-pill">🚕 ~45 דק' מהנמל לקאטה נוי</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ מלון 3 ════ -->
+    <div class="hotel-card" id="hotel3">
+      <div class="hotel-cover hc-phuket">
+        <img src="https://images.unsplash.com/photo-1519451241324-20b4ea2c4220?w=800&q=70&auto=format&fit=crop" alt="פוקט" loading="lazy" onerror="this.style.opacity=0">
+        <div class="cover-grad"></div>
+        <div class="cover-dest"><span class="dest-badge b-phuket">📍 פוקט</span></div>
+        <div class="cover-scores">
+          <div class="csb"><div class="csb-num g">8.5</div><div class="csb-lbl">ציון כולל</div></div>
+        </div>
+        <div class="cover-bottom">
+          <div class="cover-stars">★★★★★</div>
+          <div class="cover-title"><span class="c-num n3">3</span>Katathani Phuket Beach Resort</div>
+          <div class="cover-sub-text">850 מטר חוף פרטי · Kata Noi Beach</div>
+        </div>
+      </div>
+      <div class="tabs-bar">
+        <button class="tab-btn active" onclick="showTab(&#39;h3&#39;,&#39;overview&#39;,this)">סקירה</button>
+        <button class="tab-btn" onclick="showTab(&#39;h3&#39;,&#39;location&#39;,this)">מיקום</button>
+        <button class="tab-btn" onclick="showTab(&#39;h3&#39;,&#39;vibe&#39;,this)">אופי</button>
+        <button class="tab-btn" onclick="showTab(&#39;h3&#39;,&#39;notes&#39;,this)">הערות</button>
+        <button class="tab-btn" onclick="showTab(&#39;h3&#39;,&#39;compare&#39;,this)">השוואה</button>
+      </div>
+
+      <div id="h3-overview" class="tab-panel active" style="display: block; min-height: 409px;">
+        <div class="ov-grid">
+          <div class="ov-card full accent">
+            <div class="ov-icon">📅</div>
+            <div class="ov-lbl">תאריכי שהייה</div>
+            <div class="ov-val">10.02 — 16.02.2027 <span style="font-weight:400;font-size:12px;color:var(--bk-muted)">· 6 לילות</span></div>
+          </div>
+          <div class="ov-card full">
+            <div class="ov-icon">📍</div>
+            <div class="ov-lbl">כתובת</div>
+            <div class="ov-sub">14 Kata Noi Road, Karon, Mueang, Phuket 83100</div>
+            <a class="maps-link" style="margin-top:4px;display:inline-block" href="https://www.google.com/maps/search/?api=1&amp;query=Katathani+Phuket+Beach+Resort" target="_blank">🗺 פתח במפות ›</a>
+          </div>
+          <div class="ov-card">
+            <div class="ov-icon">🏖</div>
+            <div class="ov-lbl">חוף</div>
+            <div class="ov-val">Kata Noi Beach</div>
+            <div class="ov-sub">850 מטר פרטי</div>
+          </div>
+          <div class="ov-card">
+            <div class="ov-icon">🛏</div>
+            <div class="ov-lbl">חדר</div>
+            <div class="ov-val">Family Room</div>
+            <div class="ov-sub">2 חדרים</div>
+          </div>
+          <div class="ov-card accent">
+            <div class="ov-icon">💰</div>
+            <div class="ov-lbl">מחיר</div>
+            <div class="ov-val">฿12,500 / לילה</div>
+            <div class="ov-sub">סה"כ ฿150,000</div>
+          </div>
+          <div class="ov-card">
+            <div class="ov-icon">⭐</div>
+            <div class="ov-lbl">TripAdvisor</div>
+            <div class="ov-val">4/5</div>
+            <div class="ov-sub">6,566 ביקורות</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="h3-location" class="tab-panel" style="display: none; min-height: 409px;">
+        <div class="loc-wrap">
+          <div class="loc-top"><span>ציון מיקום — חוף מרהיב, קרוב ל-Kata</span><span>9/10</span></div>
+          <div class="loc-bar"><div class="loc-fill fill-g" style="width:90%"></div></div>
+        </div>
+        <div class="iso-box iso-ok">
+          <div class="iso-title">🏖 מרכז התיירות: Kata Beach — ~1.5 ק"מ</div>
+          <div class="iso-detail">~1.5 ק"מ · 15 דקות הליכה · או 5 דקות נסיעה<br>קאטה = מסעדות, ברים, חנויות, שוק לילה, אווירה משפחתית</div>
+          <div class="iso-verdict">✓ הכי נגיש מהשלושה. ילדה בת 12 יכולה ללכת לבד עם חברים.</div>
+        </div>
+      </div>
+
+      <div id="h3-vibe" class="tab-panel" style="display: none; min-height: 409px;">
+        <div class="vibe-block">
+          <div class="vibe-head"><span class="vibe-region">פוקט</span><span class="vibe-title">אופי האזור</span></div>
+          <div class="vibe-body">
+            <div class="vibe-grid">
+              <div><div class="vibe-lbl">🔇 שקט האזור</div><div class="vibe-track"><div class="vibe-fill vfq" style="width:50%"></div></div><div class="vibe-val">קאטה — שקטה יחסית</div></div>
+              <div><div class="vibe-lbl">🏃 פעילות</div><div class="vibe-track"><div class="vibe-fill vfa" style="width:85%"></div></div><div class="vibe-val">גבוה — כל מה שצריך</div></div>
+            </div>
+            <div class="vibe-text">האי הגדול של תאילנד · קאטה = משפחתי עם חוף יפה · הרבה שירותים נגישים</div>
+          </div>
+        </div>
+        <div class="vibe-block">
+          <div class="vibe-head"><span class="vibe-title">🏨 אופי המלון — Katathani</span></div>
+          <div class="vibe-body">
+            <div class="vibe-grid">
+              <div><div class="vibe-lbl">🔇 שקט המלון</div><div class="vibe-track"><div class="vibe-fill vfq" style="width:70%"></div></div><div class="vibe-val">7/10 — שקט בחוף</div></div>
+              <div><div class="vibe-lbl">👨‍👩‍👧 אווירה</div><div class="vibe-track"><div class="vibe-fill vfa" style="width:85%"></div></div><div class="vibe-val">משפחות בעיקר</div></div>
+            </div>
+            <div class="fit-row"><div class="fit-dot dg"></div><span>מתאים למשפחה פעילה — חוף, עיר, בריכות הכל ביחד</span></div>
+            <div class="fit-row"><div class="fit-dot dg"></div><span>ילדה בת 12 יכולה ללכת לבד לקאטה (~1.5 ק"מ)</span></div>
+            <div class="fit-row"><div class="fit-dot da"></div><span>קאטה יש קצת חיי לילה — המלון עצמו שקט</span></div>
+          </div>
+        </div>
+        <div class="vibe-block">
+          <div class="vibe-head"><span class="vibe-title">👧 ציון לילדים</span></div>
+          <div class="vibe-body">
+            <div class="kids-row">
+              <div class="kids-num ks-g">9<span style="font-size:14px">/10</span></div>
+              <div class="kids-detail">✓ Family Room · בריכות · חוף פרטי · פעילויות<br>✓ קאטה ברגל — ילדה בת 12 עצמאית לחלוטין</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="h3-notes" class="tab-panel" style="display: none; min-height: 409px;">
+        <div class="tags">
+          <span class="tag tg">✓ 850 מטר חוף פרטי</span>
+          <span class="tag tg">✓ Family Room עם כל המשפחה</span>
+          <span class="tag tg">✓ Kata קרובה — 1.5 ק"מ ברגל</span>
+          <span class="tag tg">✓ כל החדרים שופצו לאחרונה</span>
+          <span class="tag tg">✓ בופה בוקר מצוין</span>
+          <span class="tag tg">✓ שירות צוות חם ומקצועי</span>
+          <span class="tag tg">✓ פעילויות לילדים במקום</span>
+          <span class="tag tw">⚠ מחירי מסעדות ופעילויות יקרים</span>
+          <span class="tag tw">⚠ דיווחים על לחות בחלק מהחדרים</span>
+        </div>
+      </div>
+
+      <div id="h3-compare" class="tab-panel" style="display: none; min-height: 409px;">
+        <div class="cmp-intro">מלונות 5 כוכבים באזור Kata Beach · פוקט · עד 10 ק"מ</div>
+        <table class="cmp-table">
+          <thead>
+            <tr>
+              <th style="text-align:right">מלון</th>
+              <th>ציון כולל</th>
+              <th>לילדים</th>
+              <th>מיקום</th>
+              <th>מחיר ממוצע</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="cmp-ours">
+              <td class="cmp-name">Katathani Phuket <span class="cmp-tag ct-ours">ההצעה שלנו</span></td>
+              <td><span class="cmp-score cs-g">8.5</span></td>
+              <td><span class="cmp-score cs-g">9</span></td>
+              <td><span class="cmp-score cs-g">9</span></td>
+              <td>฿12,500</td>
+            </tr>
+            <tr>
+              <td class="cmp-name">Beyond Kata Resort</td>
+              <td><span class="cmp-score cs-g">8</span></td>
+              <td><span class="cmp-score cs-a">6</span></td>
+              <td><span class="cmp-score cs-g">9</span></td>
+              <td>฿16,000</td>
+            </tr>
+            <tr>
+              <td class="cmp-name">Novotel Phuket Kata Avista</td>
+              <td><span class="cmp-score cs-a">7.5</span></td>
+              <td><span class="cmp-score cs-g">8</span></td>
+              <td><span class="cmp-score cs-g">8.5</span></td>
+              <td>฿6,000</td>
+            </tr>
+            <tr>
+              <td class="cmp-name">Cape Sienna Phuket <span class="cmp-tag ct-b">יוקרה</span></td>
+              <td><span class="cmp-score cs-g">9</span></td>
+              <td><span class="cmp-score cs-a">5</span></td>
+              <td><span class="cmp-score cs-a">7</span></td>
+              <td>฿18,000</td>
+            </tr>
+            <tr>
+              <td class="cmp-name">Kata Palm Resort</td>
+              <td><span class="cmp-score cs-a">7</span></td>
+              <td><span class="cmp-score cs-a">7</span></td>
+              <td><span class="cmp-score cs-g">8</span></td>
+              <td>฿3,500</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="cmp-price-note">* מחירים ממוצעים לחדר ללילה לפי booking.com פבר׳ 2027 — עשויים להשתנות</div>
+        <div class="cmp-verdict">
+          <div class="cmp-verdict-title">✅ מה מקבלים ב-Katathani ביחס לאחרים?</div>
+          <div class="cmp-verdict-text">
+            ה-Katathani הוא הבחירה הטובה ביותר לאזור Kata Noi למשפחות. ציון הילדים הגבוה ביותר בהשוואה, חוף פרטי של 850 מטר, Family Room — ובמחיר תחרותי לעומת ה-Beyond Kata וה-Cape Sienna שמוכוונים יותר לזוגות. הנובוטל זול יותר אך ללא חוף פרטי.
+          </div>
+        </div>
+      </div>
+    </div><!-- /hotel3 -->
+
+  </div><!-- /content-col -->
+
+  <!-- Desktop map (inside grid) -->
+  <div class="map-col-desktop">
+    <div class="map-header">
+      <span class="map-header-text">🗺 מפת המסלול — חוף אנדמן</span>
+    </div>
+    <div id="routeMap"></div>
+  </div>
+</div><!-- /outer -->
+
+<!-- Mobile map: direct child of body so position:fixed works on iOS Safari -->
+<div class="map-col-mobile" id="mapCol">
+  <div class="map-header">
+    <span class="map-header-text">🗺 מפת המסלול</span>
+    <button class="map-close" onclick="closeMap()" style="background:none;border:none;color:rgba(255,255,255,.8);font-size:20px;cursor:pointer;padding:0 4px;line-height:1">✕</button>
+  </div>
+  <div id="routeMapMobile"></div>
+</div>
+
+<!-- Mobile toggle button -->
+<button class="map-mobile-toggle" id="mapToggle" onclick="toggleMap()">🗺&nbsp; הצג מפה</button>
+
+<!-- Scroll to top -->
+<button id="scrollTop" onclick="window.scrollTo({top:0,behavior:&#39;smooth&#39;})" style="display: none;">↑</button>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+// ── TABS: use inline style so equalizeTabHeights doesn't conflict ──
+function showTab(card, tab, btn) {
+  ['overview','location','vibe','notes','compare'].forEach(function(t) {
+    var p = document.getElementById(card+'-'+t);
+    if (p) { p.classList.remove('active'); p.style.display = 'none'; }
+  });
+  var target = document.getElementById(card+'-'+tab);
+  if (target) { target.classList.add('active'); target.style.display = 'block'; }
+  btn.closest('.tabs-bar').querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+
+// ── OPTION SWITCHER ──
+var currentOpt = 1;
+function setOption(n) {
+  currentOpt = n;
+  document.body.classList.toggle('view-opt1', n===1);
+  document.body.classList.toggle('view-opt2', n===2);
+  document.getElementById('optBtn1').classList.toggle('active', n===1);
+  document.getElementById('optBtn2').classList.toggle('active', n===2);
+  // show/hide opt nav elements
+  document.getElementById('stickyNav').style.display  = n===1 ? '' : 'none';
+  document.getElementById('stickyNav2').style.display = n===2 ? '' : 'none';
+  // show/hide opt2-only elements
+  document.querySelectorAll('.opt1-only').forEach(function(el){ el.style.display = n===1 ? '' : 'none'; });
+  document.querySelectorAll('.opt2-only').forEach(function(el){ el.style.display = n===2 ? '' : 'none'; });
+  // update stops and redraw maps
+  stops = n===1 ? stops1 : stops2;
+  if (mapDesktop) { updateMap(mapDesktop); }
+  if (mapMobile)  { updateMap(mapMobile);  }
+  // re-equalize tab heights after content change
+  setTimeout(equalizeTabHeights, 100);
+  // update nav tracking
+  setupNavTracking();
+}
+
+// ── MAP SETUP ──
+var stops1 = [
+  { ll:[8.032,98.833], num:'1', color:'#1d4ed8', name:'Dusit Thani Krabi', sub:'קראבי · Klong Muang · ציון 7' },
+  { ll:[8.770,98.258], num:'2', color:'#b45309', name:'Kalima Khao Lak',   sub:'קאו לאק · Lam Kaen · ציון 5'  },
+  { ll:[7.818,98.297], num:'3', color:'#166534', name:'Katathani Phuket',  sub:'פוקט · Kata Noi · ציון 8.5'  }
+];
+var stops2 = [
+  { ll:[8.032,98.833], num:'1', color:'#1d4ed8', name:'Dusit Thani Krabi',    sub:'קראבי · Klong Muang · ציון 7'   },
+  { ll:[7.784,98.768], num:'2', color:'#0891b2', name:'Phi Phi Natural Resort',sub:'Laem Tong · ציון 8.4'           },
+  { ll:[7.818,98.297], num:'3', color:'#166534', name:'Katathani Phuket',      sub:'פוקט · Kata Noi · ציון 8.5'    }
+];
+var stops = stops1;
+
+function addMarkers(m, stopsArr) {
+  var markers = [];
+  stopsArr.forEach(function(s) {
+    var mk = L.marker(s.ll, { icon: L.divIcon({
+      html:'<div style="background:'+s.color+';color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4);">'+s.num+'</div>',
+      className:'', iconSize:[32,32], iconAnchor:[16,16], popupAnchor:[0,-18]
+    })}).addTo(m)
+      .bindPopup('<div style="direction:rtl;text-align:right;font-family:-apple-system,sans-serif;min-width:140px"><strong>'+s.name+'</strong><br><span style="font-size:11px;color:#666">'+s.sub+'</span></div>');
+    markers.push(mk);
+  });
+  return markers;
+}
+
+function buildMap(containerId) {
+  var m = L.map(containerId, { scrollWheelZoom:false, tap:true, zoomControl:true });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution:'© OpenStreetMap', maxZoom:18
+  }).addTo(m);
+  m._myMarkers = addMarkers(m, stops);
+  m._myLine = L.polyline(stops.map(function(s){return s.ll;}),{color:'#febb02',weight:3,opacity:.9,dashArray:'10,7'}).addTo(m);
+  m.fitBounds(L.latLngBounds(stops.map(function(s){return s.ll;})),{padding:[40,40]});
+  return m;
+}
+
+function updateMap(m) {
+  if (!m) return;
+  (m._myMarkers||[]).forEach(function(mk){ m.removeLayer(mk); });
+  if (m._myLine) m.removeLayer(m._myLine);
+  m._myMarkers = addMarkers(m, stops);
+  m._myLine = L.polyline(stops.map(function(s){return s.ll;}),{color:'#febb02',weight:3,opacity:.9,dashArray:'10,7'}).addTo(m);
+  m.fitBounds(L.latLngBounds(stops.map(function(s){return s.ll;})),{padding:[40,40]});
+}
+
+// Desktop map (always visible)
+var desktopMapEl = document.getElementById('routeMap');
+var mapDesktop = desktopMapEl ? buildMap('routeMap') : null;
+
+// Mobile map (lazy init on first open)
+var mapMobile = null;
+function ensureMobileMap() {
+  if (!mapMobile) { mapMobile = buildMap('routeMapMobile'); }
+}
+
+// ── MOBILE TOGGLE ──
+function toggleMap() {
+  var col = document.getElementById('mapCol');
+  var btn = document.getElementById('mapToggle');
+  var isOpen = col.classList.toggle('open');
+  btn.classList.toggle('is-open', isOpen);
+  btn.innerHTML = isOpen ? '✕&nbsp; סגור מפה' : '🗺&nbsp; הצג מפה';
+  if (isOpen) {
+    ensureMobileMap();
+    setTimeout(function(){
+      mapMobile.invalidateSize();
+      mapMobile.fitBounds(L.latLngBounds(stops.map(function(s){return s.ll;})),{padding:[40,40]});
+    }, 300);
+  }
+}
+function closeMap() {
+  var col = document.getElementById('mapCol');
+  var btn = document.getElementById('mapToggle');
+  col.classList.remove('open');
+  btn.classList.remove('is-open');
+  btn.innerHTML = '🗺&nbsp; הצג מפה';
+}
+
+// ── EQUALIZE TAB HEIGHTS (skip hidden cards) ──
+function equalizeTabHeights() {
+  document.querySelectorAll('.hotel-card').forEach(function(card) {
+    // skip cards that are hidden by option switching
+    if (card.offsetParent === null) return;
+    var panels = card.querySelectorAll('.tab-panel');
+    var maxH = 0;
+    panels.forEach(function(p) { p.style.display = 'block'; p.style.minHeight = ''; });
+    panels.forEach(function(p) { if (p.offsetHeight > maxH) maxH = p.offsetHeight; });
+    panels.forEach(function(p) {
+      p.style.display = p.classList.contains('active') ? 'block' : 'none';
+      p.style.minHeight = maxH + 'px';
+    });
+  });
+}
+
+window.addEventListener('load', function(){
+  if (mapDesktop) setTimeout(function(){ mapDesktop.invalidateSize(); }, 150);
+  setTimeout(equalizeTabHeights, 300);
+});
+window.addEventListener('resize', function(){
+  if (mapDesktop) setTimeout(function(){ mapDesktop.invalidateSize(); }, 100);
+});
+
+// ── SCROLL TO TOP ──
+var scrollBtn = document.getElementById('scrollTop');
+window.addEventListener('scroll', function(){ scrollBtn.style.display = window.scrollY > 250 ? 'flex' : 'none'; }, {passive:true});
+
+// ── ACTIVE NAV ──
+var hEls, nBtns;
+function setupNavTracking() {
+  if (currentOpt === 1) {
+    hEls  = ['hotel1','hotel2','hotel3'].map(function(id){ return document.getElementById(id); });
+    nBtns = ['snav1','snav2','snav3'].map(function(id){ return document.getElementById(id); });
+  } else {
+    hEls  = ['hotel1','hotel2b','hotel3'].map(function(id){ return document.getElementById(id); });
+    nBtns = ['snav1b','snav2b','snav3b'].map(function(id){ return document.getElementById(id); });
+  }
+}
+setupNavTracking();
+
+function upNav(){
+  var nav = document.getElementById(currentOpt===1 ? 'stickyNav' : 'stickyNav2');
+  var navH = nav ? nav.offsetHeight + 20 : 60;
+  var mid = window.scrollY + navH + 50;
+  var cur = 0;
+  hEls.forEach(function(el,i){ if(el && el.offsetTop <= mid) cur = i; });
+  nBtns.forEach(function(b,i){ if(b) b.classList.toggle('active', i===cur); });
+}
+window.addEventListener('scroll', upNav, {passive:true});
+upNav();
+
+// Smooth scroll with offset
+document.addEventListener('click', function(e){
+  var a = e.target.closest('.sn-stop');
+  if (!a) return;
+  e.preventDefault();
+  var t = document.querySelector(a.getAttribute('href'));
+  if (!t) return;
+  var nav = document.getElementById(currentOpt===1 ? 'stickyNav' : 'stickyNav2');
+  var off = (nav ? nav.offsetHeight : 50) + 10;
+  window.scrollTo({top: t.getBoundingClientRect().top + window.scrollY - off, behavior:'smooth'});
+});
+</script>
+
+
+</body></html>
