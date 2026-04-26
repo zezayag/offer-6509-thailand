@@ -5,8 +5,21 @@
 <title>תאילנד פברואר 2027 — הצעה 6509</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <style>
-/* MOBILE-ONLY block disabled — page now responsive on all viewports */
-.mobile-block{display:none!important}
+/* MOBILE-ONLY block: hide on phones, show blocking message on tablet/desktop */
+.mobile-block{display:none}
+@media (min-width: 768px) {
+  .mobile-block{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    position:fixed;inset:0;z-index:99999;
+    background:#003580;
+    color:#fff;text-align:center;padding:2rem;
+    gap:1rem;
+  }
+  .mobile-block-icon{font-size:56px}
+  .mobile-block-title{font-size:22px;font-weight:800;color:#febb02}
+  .mobile-block-sub{font-size:15px;color:rgba(255,255,255,.75);max-width:340px;line-height:1.6}
+  body > *:not(.mobile-block){display:none !important}
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:14px;-webkit-text-size-adjust:100%}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#f2f6fa;color:#262626;direction:rtl}
